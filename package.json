@@ -1,0 +1,19 @@
+{
+  "name": "proactive-assistant",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run build -w @proass/server && npm run build -w @proass/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "demo:audio": "node scripts/generate-demo-audio.mjs"
+  },
+  "engines": {
+    "node": ">=20.12"
+  }
+}

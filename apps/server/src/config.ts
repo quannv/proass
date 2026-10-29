@@ -1,0 +1,59 @@
+import { existsSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { fileURLToPath } from "node:url";
+import { TriggerConfig } from "@proass/shared";
+
+// Load env files if present (apps/server/.env first, then repo-root .env). Real env vars win.
+for (const rel of ["../.env", "../../../.env"]) {
+  const path = fileURLToPath(new URL(rel, import.meta.url));
+  if (existsSync(path)) process.loadEnvFile(path);
+}
+
+const env = process.env;
+// `muse_key` is accepted for backward compatibility with the original .env.
+const museApiKey = env.MUSE_API_KEY || env.muse_key || "";
+
+function provider(value: string | undefined): "muse" | "mock" {
+  if (value === "mock" || value === "muse") return value;
+  return museApiKey ? "muse" : "mock";
+}
+
+function parseOverrides(raw: string | undefined): Partial<TriggerConfig> {
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw) as Partial<TriggerConfig>;
+  } catch {
+    console.warn("[config] TRIGGER_OVERRIDES is not valid JSON; ignoring");
+    return {};
+  }
+}
+
+export const config = {
+  port: Number(env.PORT || 8787),
+  allowedOrigins: (env.ALLOWED_ORIGINS || "http://localhost:3000")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+  // A random secret means tokens die on restart; set SESSION_SECRET for multi-instance deploys.
+  sessionSecret: env.SESSION_SECRET || randomBytes(32).toString("hex"),
+  tokenTtlMs: 60 * 60 * 1000,
+  maxSessionsPerIpPerHour: Number(env.MAX_SESSIONS_PER_IP_PER_HOUR || 60),
+
+  museApiKey,
+  museBaseUrl: env.MUSE_BASE_URL || "https://api.meta.ai/v1",
+  sttProvider: provider(env.STT_PROVIDER),
+  llmProvider: provider(env.LLM_PROVIDER),
+  sttUrl: env.MUSE_STT_URL || "wss://api.meta.ai/v1/asr/realtime",
+  sttModel: env.MUSE_STT_MODEL || "muse-voice-transcribe-1.0",
+  sttMode: (env.MUSE_STT_MODE || "DIARIZATION") as "ENDPOINTING" | "DIARIZATION",
+  llmModel: env.MUSE_LLM_MODEL || "muse-spark-1.3-contributor",
+  /** Muse Spark always reasons; "minimal" keeps suggestion latency low. */
+  suggestReasoningEffort: env.LLM_SUGGEST_REASONING_EFFORT || "minimal",
+  deepReasoningEffort: env.LLM_DEEP_REASONING_EFFORT || "low",
+  llmTimeoutMs: Number(env.LLM_TIMEOUT_MS || 25_000),
+  triggerOverrides: parseOverrides(env.TRIGGER_OVERRIDES),
+};
+
+if ((config.sttProvider === "muse" || config.llmProvider === "muse") && !museApiKey) {
+  throw new Error("MUSE_API_KEY is required when STT_PROVIDER or LLM_PROVIDER is 'muse'");
+}

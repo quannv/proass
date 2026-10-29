@@ -1,0 +1,113 @@
+{
+  "durationMs": 143066,
+  "lines": [
+    {
+      "speaker": "Maya",
+      "text": "Okay everyone, thanks for joining. The goal today is to decide whether we can launch the enterprise tier in the first week of December.",
+      "startMs": 800,
+      "endMs": 8338
+    },
+    {
+      "speaker": "Alex",
+      "text": "From the sales side, three of our biggest prospects keep asking the same thing. They will not sign until we have SOC 2 Type 2.",
+      "startMs": 9088,
+      "endMs": 17537
+    },
+    {
+      "speaker": "Priya",
+      "text": "Right. We finished the Type 1 report last month, but Type 2 needs an observation window. Usually that is at least three months of evidence.",
+      "startMs": 18287,
+      "endMs": 26957
+    },
+    {
+      "speaker": "Daniel",
+      "text": "On the engineering side, the main risk is latency. Our p95 for the search endpoint is around eight hundred milliseconds, and the target in the contract draft is three hundred.",
+      "startMs": 27707,
+      "endMs": 38612
+    },
+    {
+      "speaker": "Maya",
+      "text": "What is driving that? Is it the retrieval step?",
+      "startMs": 39362,
+      "endMs": 42305
+    },
+    {
+      "speaker": "Daniel",
+      "text": "Mostly, yes. The RAG pipeline calls the vector database twice. If we add a cache in front of the re-ranker, we could probably cut it in half.",
+      "startMs": 43055,
+      "endMs": 52573
+    },
+    {
+      "speaker": "Alex",
+      "text": "One more thing. A prospect in Germany asked about GDPR. I told them the maximum fine is one million euros, so the risk is small.",
+      "startMs": 53323,
+      "endMs": 63140
+    },
+    {
+      "speaker": "Priya",
+      "text": "Hmm, I am not sure that is right. We should double check before we put anything in writing.",
+      "startMs": 63890,
+      "endMs": 69113
+    },
+    {
+      "speaker": "Maya",
+      "text": "Agreed. Let's not make legal claims on sales calls. Priya, can you send Alex the correct summary?",
+      "startMs": 69863,
+      "endMs": 76273
+    },
+    {
+      "speaker": "Priya",
+      "text": "Sure. I will send it by Thursday, together with our draft DPA.",
+      "startMs": 77023,
+      "endMs": 81428
+    },
+    {
+      "speaker": "Maya",
+      "text": "Good. So, on the launch date. Given the SOC 2 timeline, I suggest we run a design partner program in December, and do the full launch in Q1.",
+      "startMs": 82178,
+      "endMs": 91671
+    },
+    {
+      "speaker": "Daniel",
+      "text": "That works for engineering. It gives us time for the caching work and a proper load test.",
+      "startMs": 92421,
+      "endMs": 97769
+    },
+    {
+      "speaker": "Alex",
+      "text": "I can live with that, as long as design partners get a discount and early access.",
+      "startMs": 98519,
+      "endMs": 103645
+    },
+    {
+      "speaker": "Maya",
+      "text": "Okay, decision then. We go with a design partner program in December, and general availability in the first quarter. Daniel, please own the latency fix.",
+      "startMs": 104395,
+      "endMs": 114168
+    },
+    {
+      "speaker": "Daniel",
+      "text": "Will do. I will share a plan with the p95 numbers by next Tuesday.",
+      "startMs": 114918,
+      "endMs": 119852
+    },
+    {
+      "speaker": "Maya",
+      "text": "Great. Last topic, pricing. Alex, what are you seeing on churn?",
+      "startMs": 120602,
+      "endMs": 125471
+    },
+    {
+      "speaker": "Alex",
+      "text": "Net revenue retention is about one hundred and eight percent, but small teams churn right after the trial. Maybe we need usage based pricing for them.",
+      "startMs": 126221,
+      "endMs": 135728
+    },
+    {
+      "speaker": "Maya",
+      "text": "Interesting. Let's put that on the agenda for next week. Thanks, everyone.",
+      "startMs": 136478,
+      "endMs": 141566
+    }
+  ]
+}

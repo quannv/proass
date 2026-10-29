@@ -1,0 +1,151 @@
+{
+  "title": "Enterprise tier launch sync",
+  "speakers": {
+    "Maya": { "voice": "Samantha", "role": "Product manager" },
+    "Alex": { "voice": "Alex", "role": "Sales lead" },
+    "Priya": { "voice": "Veena", "role": "Security & compliance" },
+    "Daniel": { "voice": "Daniel", "role": "Engineering lead" }
+  },
+  "lines": [
+    { "speaker": "Maya", "text": "Okay everyone, thanks for joining. The goal today is to decide whether we can launch the enterprise tier in the first week of December." },
+    { "speaker": "Alex", "text": "From the sales side, three of our biggest prospects keep asking the same thing. They will not sign until we have SOC 2 Type 2." },
+    { "speaker": "Priya", "text": "Right. We finished the Type 1 report last month, but Type 2 needs an observation window. Usually that is at least three months of evidence." },
+    { "speaker": "Daniel", "text": "On the engineering side, the main risk is latency. Our p95 for the search endpoint is around eight hundred milliseconds, and the target in the contract draft is three hundred." },
+    { "speaker": "Maya", "text": "What is driving that? Is it the retrieval step?" },
+    { "speaker": "Daniel", "text": "Mostly, yes. The RAG pipeline calls the vector database twice. If we add a cache in front of the re-ranker, we could probably cut it in half." },
+    { "speaker": "Alex", "text": "One more thing. A prospect in Germany asked about GDPR. I told them the maximum fine is one million euros, so the risk is small." },
+    { "speaker": "Priya", "text": "Hmm, I am not sure that is right. We should double check before we put anything in writing." },
+    { "speaker": "Maya", "text": "Agreed. Let's not make legal claims on sales calls. Priya, can you send Alex the correct summary?" },
+    { "speaker": "Priya", "text": "Sure. I will send it by Thursday, together with our draft DPA." },
+    { "speaker": "Maya", "text": "Good. So, on the launch date. Given the SOC 2 timeline, I suggest we run a design partner program in December, and do the full launch in Q1." },
+    { "speaker": "Daniel", "text": "That works for engineering. It gives us time for the caching work and a proper load test." },
+    { "speaker": "Alex", "text": "I can live with that, as long as design partners get a discount and early access." },
+    { "speaker": "Maya", "text": "Okay, decision then. We go with a design partner program in December, and general availability in the first quarter. Daniel, please own the latency fix." },
+    { "speaker": "Daniel", "text": "Will do. I will share a plan with the p95 numbers by next Tuesday." },
+    { "speaker": "Maya", "text": "Great. Last topic, pricing. Alex, what are you seeing on churn?" },
+    { "speaker": "Alex", "text": "Net revenue retention is about one hundred and eight percent, but small teams churn right after the trial. Maybe we need usage based pricing for them." },
+    { "speaker": "Maya", "text": "Interesting. Let's put that on the agenda for next week. Thanks, everyone." }
+  ],
+  "suggestions": [
+    {
+      "afterLine": 2,
+      "type": "definition",
+      "title": "SOC 2 Type 1 vs Type 2",
+      "body": "Type 1 checks that security controls are designed correctly at one point in time. Type 2 tests that they actually operated over an observation period, typically 3 to 12 months, which is why enterprise buyers prefer it.",
+      "trigger_quote": "until we have SOC 2 Type 2",
+      "confidence": 0.92,
+      "more": "SOC 2 is an AICPA attestation framework built on five Trust Services Criteria: security, availability, processing integrity, confidentiality and privacy. A Type 2 report can only be issued after the observation window ends, so the earliest realistic date depends on when evidence collection started. Some teams shorten the first window to three months to unblock deals, then move to a 12-month cycle."
+    },
+    {
+      "afterLine": 3,
+      "type": "definition",
+      "title": "What p95 latency means",
+      "body": "95% of requests finish faster than this number; the slowest 5% take longer. It captures tail latency that averages hide, which is why contracts often specify p95 or p99.",
+      "trigger_quote": "Our p95 for the search endpoint",
+      "confidence": 0.9,
+      "more": "If p95 is 800 ms, one in twenty searches takes at least 800 ms. Tail latency usually comes from the slowest dependency in a request (here, possibly the vector database or re-ranker), from cold caches, or from garbage-collection pauses. Measure p95 per pipeline stage to find the dominant contributor before optimizing."
+    },
+    {
+      "afterLine": 5,
+      "type": "definition",
+      "title": "RAG and re-ranking",
+      "body": "Retrieval-Augmented Generation fetches relevant documents before the model answers. A re-ranker re-scores retrieved results by relevance; caching its output for repeated queries avoids recomputing expensive scores.",
+      "trigger_quote": "The RAG pipeline calls the vector database twice",
+      "confidence": 0.86,
+      "more": "A typical RAG search does: embed the query, run an approximate nearest-neighbour search in a vector database, then re-rank the top results with a heavier cross-encoder model. Re-ranking is often the slowest step. Caching by normalized query, or merging the two vector database calls into one, are common first wins."
+    },
+    {
+      "afterLine": 6,
+      "type": "fact_check",
+      "title": "GDPR fines are far higher",
+      "body": "Under GDPR Article 83, serious infringements can be fined up to €20 million or 4% of global annual turnover, whichever is higher. €1 million is not the maximum.",
+      "trigger_quote": "the maximum fine is one million euros",
+      "confidence": 0.94,
+      "more": "GDPR has two fine tiers: up to €10 million or 2% of worldwide annual turnover for lighter infringements, and up to €20 million or 4% for violations of core principles such as lawful basis or data subject rights. Regulators have issued fines well above €1 million, so this claim should be corrected with the prospect."
+    },
+    {
+      "afterLine": 7,
+      "type": "question_to_ask",
+      "title": "Should legal review sales answers?",
+      "body": "You could ask whether there is an approved FAQ for compliance questions, so sales can answer GDPR and security questions consistently without improvising.",
+      "trigger_quote": "We should double check before we put anything in writing",
+      "confidence": 0.72,
+      "more": "Many B2B companies maintain a security and compliance FAQ or a trust center page reviewed by legal. It speeds up deals, avoids conflicting statements, and reduces the risk of a misstatement ending up in a contract."
+    },
+    {
+      "afterLine": 9,
+      "type": "definition",
+      "title": "DPA: Data Processing Agreement",
+      "body": "A contract required by GDPR Article 28 between a customer (data controller) and a vendor (data processor), defining how personal data is handled, secured and deleted.",
+      "trigger_quote": "together with our draft DPA",
+      "confidence": 0.88,
+      "more": "A DPA typically covers the subject matter and duration of processing, security measures, sub-processors, breach notification timelines, and data transfer mechanisms such as Standard Contractual Clauses for transfers outside the EU. German customers in particular often request one before signing."
+    },
+    {
+      "afterLine": 9,
+      "type": "action_item",
+      "title": "Priya: GDPR summary and DPA",
+      "body": "Priya will send Alex the correct GDPR fine summary and the draft DPA by Thursday.",
+      "trigger_quote": "I will send it by Thursday",
+      "confidence": 0.9,
+      "more": "Owner: Priya. Due: Thursday. Deliverables: corrected GDPR fine summary for the German prospect, and the draft Data Processing Agreement."
+    },
+    {
+      "afterLine": 10,
+      "type": "question_to_ask",
+      "title": "What do design partners commit to?",
+      "body": "Ask what design partners give in return for the discount, for example a feedback cadence, a case study, or a commitment to convert to a paid plan at general availability.",
+      "trigger_quote": "run a design partner program in December",
+      "confidence": 0.78,
+      "more": "Design partner programs work best with clear mutual commitments: a fixed number of partners, regular feedback sessions, reference or case-study rights, and pre-agreed pricing at launch. Without these, discounts can turn into long-term revenue leakage."
+    },
+    {
+      "afterLine": 13,
+      "type": "decision",
+      "title": "Design partners in December, GA in Q1",
+      "body": "The team decided to run a design partner program in December and move general availability of the enterprise tier to the first quarter.",
+      "trigger_quote": "We go with a design partner program in December",
+      "confidence": 0.95,
+      "more": "Rationale discussed: SOC 2 Type 2 requires an observation window, and the latency fix plus load testing need more time. Sales accepted the plan on the condition that design partners get a discount and early access."
+    },
+    {
+      "afterLine": 14,
+      "type": "action_item",
+      "title": "Daniel: latency plan by Tuesday",
+      "body": "Daniel owns the latency fix and will share a plan with p95 numbers by next Tuesday.",
+      "trigger_quote": "I will share a plan with the p95 numbers by next Tuesday",
+      "confidence": 0.9,
+      "more": "Owner: Daniel. Due: next Tuesday. Target: bring search p95 from about 800 ms toward the 300 ms in the contract draft, likely starting with a re-ranker cache and a load test."
+    },
+    {
+      "afterLine": 16,
+      "type": "definition",
+      "title": "Net revenue retention (NRR)",
+      "body": "Revenue kept from existing customers over a period after upgrades, downgrades and churn. Above 100% means expansion outweighs losses; 108% is healthy for B2B SaaS.",
+      "trigger_quote": "Net revenue retention is about one hundred and eight percent",
+      "confidence": 0.87,
+      "more": "NRR = (starting recurring revenue + expansion − contraction − churn) ÷ starting recurring revenue. It can look healthy even while many small customers churn, because a few large accounts expanding hide the losses. Looking at logo churn by segment gives a clearer picture."
+    },
+    {
+      "afterLine": 16,
+      "type": "related_idea",
+      "title": "Usage-based tier for small teams",
+      "body": "Small teams churning after the trial may signal a price-to-value gap. A usage-based or lower entry tier could keep them, but test it with a cohort before changing list prices.",
+      "trigger_quote": "small teams churn right after the trial",
+      "confidence": 0.7,
+      "more": "Before redesigning pricing, check whether small teams churn because of price or because they never reached activation. Exit surveys and trial activation metrics can tell these apart; a usage-based tier only helps with the first."
+    }
+  ],
+  "summary": {
+    "summary": "The team reviewed readiness for the enterprise tier launch. Enterprise prospects require SOC 2 Type 2, which needs an observation window, and search latency (p95 about 800 ms) is far above the 300 ms contract target. A GDPR claim made to a German prospect was flagged as incorrect. The team agreed on a design partner program in December with general availability in Q1, and will discuss usage-based pricing for small teams next week.",
+    "decisions": [
+      "Run a design partner program in December; move general availability of the enterprise tier to Q1.",
+      "No legal or compliance claims on sales calls without review."
+    ],
+    "action_items": [
+      { "task": "Send Alex a correct GDPR fine summary and the draft DPA", "owner": "Priya", "due": "Thursday" },
+      { "task": "Own the latency fix and share a plan with p95 numbers", "owner": "Daniel", "due": "Next Tuesday" },
+      { "task": "Add usage-based pricing for small teams to next week's agenda", "owner": "Maya", "due": "Next week" }
+    ]
+  }
+}
