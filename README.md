@@ -113,7 +113,9 @@ docker build -f apps/server/Dockerfile -t proass-server .
 docker run -p 8787:8787 -e MUSE_API_KEY=... -e ALLOWED_ORIGINS=https://your-web.app -e SESSION_SECRET=... proass-server
 ```
 
-On Railway, Render or Fly.io, use the Dockerfile, or set the build command to `npm ci && npm run build -w @proass/server` and the start command to `node apps/server/dist/index.js`.
+**Render (recommended):** the repo includes a `render.yaml` Blueprint. In the Render dashboard choose **New → Blueprint**, select this repo, then fill in `MUSE_API_KEY` and `ALLOWED_ORIGINS` (your web URL). `SESSION_SECRET` is generated automatically. The service runs on the free plan by default; free instances sleep when idle, so switch to a paid plan before a live demo.
+
+On Railway or Fly.io, use the Dockerfile, or set the build command to `npm ci && npm run build -w @proass/server` and the start command to `node apps/server/dist/index.js`.
 
 **Web**: on Vercel, set the root directory to `apps/web` and `NEXT_PUBLIC_SERVER_URL=https://your-server.example`. Mic and tab capture require HTTPS, and the server URL must also be HTTPS (WebSocket `wss://`).
 

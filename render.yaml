@@ -1,0 +1,35 @@
+# Render Blueprint for the backend (apps/server). Dashboard → New → Blueprint → pick this repo.
+# The web app (apps/web) is deployed separately (e.g. Vercel) and points NEXT_PUBLIC_SERVER_URL here.
+services:
+  - type: web
+    name: proass-server
+    runtime: node
+    region: singapore
+    # Free instances sleep after ~15 min idle (cold start ~1 min); use a paid plan for the live demo.
+    plan: free
+    branch: main
+    buildCommand: npm ci -w @proass/server -w @proass/shared --include-workspace-root && npm run build -w @proass/server
+    startCommand: node apps/server/dist/index.js
+    healthCheckPath: /health
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - apps/server/**
+        - packages/shared/**
+        - package.json
+        - package-lock.json
+        - render.yaml
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: MUSE_API_KEY
+        sync: false
+      # Comma-separated web origins, e.g. https://proass.vercel.app,http://localhost:3000
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: MUSE_LLM_MODEL
+        value: muse-spark-1.3-contributor
+      - key: MUSE_STT_MODE
+        value: DIARIZATION
