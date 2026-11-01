@@ -1,0 +1,185 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  ProActive Assistant backend (apps/server) on ECS Fargate behind an HTTPS ALB on a custom domain
+  (https:// and wss://). Deploy with scripts/deploy-aws.sh.
+
+Parameters:
+  ImageUri:
+    Type: String
+    Description: ECR image URI (with tag) of apps/server
+  SecretArn:
+    Type: String
+    Description: Secrets Manager secret holding JSON keys MUSE_API_KEY and SESSION_SECRET
+  AllowedOrigins:
+    Type: String
+    Description: Comma-separated web origins (the Amplify URL)
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Public subnets (tasks get a public IP so no NAT gateway is needed)
+  DomainName:
+    Type: String
+    Description: Backend hostname, e.g. api.example.com (CNAME it to the AlbDns output)
+  CertificateArn:
+    Type: String
+    Description: Issued ACM certificate for DomainName (same region)
+  LlmModel:
+    Type: String
+    Default: muse-wonder-1.0
+
+Resources:
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/proass-server
+      RetentionInDays: 14
+
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: proass
+
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ecs-tasks.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: read-app-secret
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref SecretArn
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: proass-server
+      RequiresCompatibilities: [FARGATE]
+      NetworkMode: awsvpc
+      Cpu: "256"
+      Memory: "512"
+      RuntimePlatform: { CpuArchitecture: ARM64, OperatingSystemFamily: LINUX }
+      ExecutionRoleArn: !GetAtt ExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: server
+          Image: !Ref ImageUri
+          Essential: true
+          PortMappings: [{ ContainerPort: 8787, Protocol: tcp }]
+          Environment:
+            - { Name: PORT, Value: "8787" }
+            - { Name: ALLOWED_ORIGINS, Value: !Ref AllowedOrigins }
+            - { Name: MUSE_LLM_MODEL, Value: !Ref LlmModel }
+            - { Name: MUSE_STT_MODE, Value: DIARIZATION }
+          Secrets:
+            - { Name: MUSE_API_KEY, ValueFrom: !Sub "${SecretArn}:MUSE_API_KEY::" }
+            - { Name: SESSION_SECRET, ValueFrom: !Sub "${SecretArn}:SESSION_SECRET::" }
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: server
+
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: proass ALB - public HTTPS (HTTP only redirects)
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0 }
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0 }
+
+  TaskSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: proass tasks - traffic from the ALB only
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 8787, ToPort: 8787, SourceSecurityGroupId: !Ref AlbSecurityGroup }
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: proass-alb
+      Scheme: internet-facing
+      Subnets: !Ref SubnetIds
+      SecurityGroups: [!Ref AlbSecurityGroup]
+      LoadBalancerAttributes:
+        # Audio streams keep sockets busy; this only matters for quiet sockets (server pings every 20 s).
+        - { Key: idle_timeout.timeout_seconds, Value: "120" }
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: proass-server
+      VpcId: !Ref VpcId
+      TargetType: ip
+      Protocol: HTTP
+      Port: 8787
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 15
+      HealthyThresholdCount: 2
+      TargetGroupAttributes:
+        # Give open meetings time to flush their last finals on redeploy.
+        - { Key: deregistration_delay.timeout_seconds, Value: "30" }
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+      Certificates: [{ CertificateArn: !Ref CertificateArn }]
+      DefaultActions: [{ Type: forward, TargetGroupArn: !Ref TargetGroup }]
+
+  HttpRedirectListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: redirect
+          RedirectConfig: { Protocol: HTTPS, Port: "443", StatusCode: HTTP_301 }
+
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn: Listener
+    Properties:
+      ServiceName: proass-server
+      Cluster: !Ref Cluster
+      TaskDefinition: !Ref TaskDefinition
+      LaunchType: FARGATE
+      # One task: sessions live in memory, so a single instance keeps things simple for the demo.
+      DesiredCount: 1
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 100
+        MaximumPercent: 200
+        DeploymentCircuitBreaker: { Enable: true, Rollback: true }
+      HealthCheckGracePeriodSeconds: 30
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets: !Ref SubnetIds
+          SecurityGroups: [!Ref TaskSecurityGroup]
+      LoadBalancers:
+        - { ContainerName: server, ContainerPort: 8787, TargetGroupArn: !Ref TargetGroup }
+
+Outputs:
+  ServerUrl:
+    Description: Set NEXT_PUBLIC_SERVER_URL to this
+    Value: !Sub "https://${DomainName}"
+  AlbDns:
+    Description: Point a CNAME for DomainName at this
+    Value: !GetAtt LoadBalancer.DNSName

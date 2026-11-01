@@ -115,6 +115,16 @@ docker run -p 8787:8787 -e MUSE_API_KEY=... -e ALLOWED_ORIGINS=https://your-web.
 
 **Render (recommended):** the repo includes a `render.yaml` Blueprint. In the Render dashboard choose **New → Blueprint**, select this repo, then fill in `MUSE_API_KEY` and `ALLOWED_ORIGINS` (your web URL). `SESSION_SECRET` is generated automatically. The service runs on the free plan by default; free instances sleep when idle, so switch to a paid plan before a live demo.
 
+**AWS (ECS + Amplify):** `infra/aws/backend.yml` runs the server on ECS Fargate (ARM64, 1 task) behind an HTTPS ALB on your own hostname, using a free ACM certificate. The Muse key and session secret live in Secrets Manager. The web app is a static export uploaded to Amplify Hosting.
+
+```bash
+DOMAIN=api.example.com scripts/deploy-aws.sh   # backend: reads MUSE_API_KEY from apps/server/.env; prints the DNS records to add
+scripts/deploy-web-aws.sh                      # web: static export pointing at https://$DOMAIN, manual Amplify deploy
+ALLOWED_ORIGINS=https://main.<appId>.amplifyapp.com scripts/deploy-aws.sh   # first time only: allow the web origin
+```
+
+Both scripts default to `AWS_PROFILE=viettrans` and `AWS_REGION=ap-southeast-1`. On the first run, add the two CNAME records it prints at your DNS provider: one validates the certificate (keep it so the certificate auto-renews), and one points `DOMAIN` at the ALB. To remove everything, run `aws cloudformation delete-stack --stack-name proass-server`, then delete the ACM certificate, the `proass-server` ECR repo, the `proass/server` secret and the `proass-web` Amplify app.
+
 On Railway or Fly.io, use the Dockerfile, or set the build command to `npm ci && npm run build -w @proass/server` and the start command to `node apps/server/dist/index.js`.
 
 **Web**: on Vercel, set the root directory to `apps/web` and `NEXT_PUBLIC_SERVER_URL=https://your-server.example`. Mic and tab capture require HTTPS, and the server URL must also be HTTPS (WebSocket `wss://`).
