@@ -30,6 +30,14 @@ export type ProviderKind = "muse" | "mock";
 export interface ProviderInfo {
   stt: ProviderKind;
   llm: ProviderKind;
+  /** LLM model id from MUSE_LLM_MODEL, e.g. "muse-wonder-1.0" (only when llm is "muse"). */
+  llmModel?: string;
+}
+
+/** "muse-wonder-1.0" → "Muse Wonder", "muse-spark-1.3-contributor" → "Muse Spark". */
+export function modelLabel(id: string): string {
+  const m = /^muse-([a-z]+)/.exec(id);
+  return m ? `Muse ${m[1]!.charAt(0).toUpperCase()}${m[1]!.slice(1)}` : id;
 }
 
 export type ServerMessage =

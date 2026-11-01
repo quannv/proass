@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import WebSocket from "ws";
 import { ClientMessageSchema, countWords, resolveTriggerConfig } from "@proass/shared";
 import type { ClientMessage, ServerMessage, SessionSettings, TriggerConfig } from "@proass/shared";
-import { config } from "./config";
+import { config, providerInfo } from "./config";
 import { ContextManager } from "./context/ContextManager";
 import { llm } from "./llm";
 import { postProcess } from "./llm/postprocess";
@@ -82,7 +82,7 @@ export class Session {
       return;
     }
     if (this.closed) return;
-    this.send({ type: "ready", sessionId: this.id, providers: { stt: config.sttProvider, llm: config.llmProvider } });
+    this.send({ type: "ready", sessionId: this.id, providers: providerInfo });
     this.summaryTimer = setInterval(() => void this.refreshSummary(), this.triggerConfig().summaryIntervalMs);
     log(this.id, `started (stt=${config.sttProvider}, llm=${config.llmProvider}, offset=${Math.round(this.offsetMs)}ms)`);
   }

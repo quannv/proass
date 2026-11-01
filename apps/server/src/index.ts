@@ -3,7 +3,7 @@ import { WebSocketServer } from "ws";
 import { ExplainRequestSchema, SummaryRequestSchema } from "@proass/shared";
 import type { ExplainResponse, SessionTokenResponse, SummaryResponse } from "@proass/shared";
 import { allowTokenFor, isOriginAllowed, issueToken, verifyToken } from "./auth";
-import { config } from "./config";
+import { config, providerInfo } from "./config";
 import { llm } from "./llm";
 import { Session, log } from "./session";
 
@@ -47,7 +47,7 @@ async function route(req: http.IncomingMessage, res: http.ServerResponse): Promi
   if (req.method === "POST" && url.pathname === "/api/session") {
     if (!isOriginAllowed(req.headers.origin)) throw new HttpError(403, "Origin not allowed");
     if (!allowTokenFor(clientIp(req))) throw new HttpError(429, "Too many sessions, try again later");
-    const body: SessionTokenResponse = { ...issueToken(), providers: { stt: config.sttProvider, llm: config.llmProvider } };
+    const body: SessionTokenResponse = { ...issueToken(), providers: providerInfo };
     return body;
   }
 

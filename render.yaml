@@ -30,6 +30,6 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: MUSE_LLM_MODEL
-        value: muse-spark-1.3-contributor
+        value: muse-wonder-1.0
       - key: MUSE_STT_MODE
         value: DIARIZATION

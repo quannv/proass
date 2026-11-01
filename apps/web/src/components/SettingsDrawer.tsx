@@ -162,7 +162,7 @@ export default function SettingsDrawer({ open, onClose }: { open: boolean; onClo
               onChange={(e) => setKeywords(e.target.value)}
               onBlur={saveKeywords}
               rows={2}
-              placeholder="e.g. Muse Spark, Kubernetes, OKR, Nguyễn"
+              placeholder="e.g. Muse Wonder, Kubernetes, OKR, Nguyễn"
               className="w-full rounded-lg border border-zinc-200 bg-transparent p-2 dark:border-zinc-700"
             />
           </Section>

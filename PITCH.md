@@ -10,7 +10,7 @@
 
 ## 3. Live demo (75 s)
 1. Press **Play demo** to start a scripted enterprise launch meeting with 4 speakers. Point out the live transcript and speaker labels from **Muse Voice Transcribe**.
-2. "SOC 2 Type 2" and "p95" come up, and definition cards slide in. The STT hears "page 95"; **Muse Spark** still explains p95 correctly.
+2. "SOC 2 Type 2" and "p95" come up, and definition cards slide in. The STT hears "page 95"; **Muse Wonder** still explains p95 correctly.
 3. A salesperson says GDPR fines max out at €1M. A **fact-check card** corrects it: €20M or 4% of global turnover.
 4. Click the card's quote to jump to that moment in the transcript. Click **Tell me more** for a deeper explanation.
 5. Decision and action-item cards appear ("Priya, GDPR summary by Thursday").
@@ -21,7 +21,7 @@ _Backup:_ if the Wi-Fi is bad, toggle **Offline mode**. The same demo runs fully
 ## 4. Technical highlights (30 s)
 - Browser AudioWorklet resamples to 24 kHz PCM16 and streams it over one WebSocket to a Node server that holds the keys.
 - Muse Voice Transcribe realtime: diarization, keyword biasing for jargon, auto-reconnect with audio replay, rotation before the 60-minute session cap.
-- Muse Spark with **strict JSON-schema structured output**. A trigger engine (word count, natural pause, min interval, stale-request abort) plus Zod validation, confidence filtering, de-duplication and quote anchoring keep the panel calm.
+- Muse Wonder with **strict JSON-schema structured output**. A trigger engine (word count, natural pause, min interval, stale-request abort) plus Zod validation, confidence filtering, de-duplication and quote anchoring keep the panel calm.
 - Adapter pattern with mock providers: the whole app runs end-to-end without keys. No server-side storage.
 
 ## 5. Roadmap (15 s)

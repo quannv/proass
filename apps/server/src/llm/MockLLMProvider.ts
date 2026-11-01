@@ -25,7 +25,7 @@ const sleep = (ms: number, signal: AbortSignal) =>
     }, { once: true });
   });
 
-/** Deterministic stand-in for Muse Spark: knows the demo meeting plus a few generic heuristics. */
+/** Deterministic stand-in for the Muse LLM: knows the demo meeting plus a few generic heuristics. */
 export class MockLLMProvider implements LLMProvider {
   async generateSuggestions(ctx: SuggestionContext, signal: AbortSignal): Promise<unknown[]> {
     await sleep(700 + Math.random() * 700, signal);
@@ -66,7 +66,7 @@ export class MockLLMProvider implements LLMProvider {
     if (quoteCoverage("SOC 2 Type 2 design partner program GDPR", all) >= 0.8) return DEMO_SUMMARY;
     const speakers = new Set(segments.map((s) => s.speaker).filter(Boolean));
     return {
-      summary: `Mock summary: a discussion with ${speakers.size || "several"} speaker(s) across ${segments.length} transcript lines. Connect Muse Spark (LLM_PROVIDER=muse) for a real summary.`,
+      summary: `Mock summary: a discussion with ${speakers.size || "several"} speaker(s) across ${segments.length} transcript lines. Connect Muse Wonder (LLM_PROVIDER=muse) for a real summary.`,
       decisions: segments.filter((s) => DECISION.test(s.text)).map((s) => s.text),
       action_items: segments.filter((s) => ACTION.test(s.text)).map((s) => ({ task: s.text, owner: s.speaker ?? "", due: "" })),
     };
@@ -75,6 +75,6 @@ export class MockLLMProvider implements LLMProvider {
   async explain(s: Pick<RawSuggestion, "type" | "title" | "body" | "trigger_quote">, _context: string, _language: string, signal: AbortSignal): Promise<string> {
     await sleep(800, signal);
     const demo = DEMO_SUGGESTIONS.find((d) => similarity(d.title, s.title) > 0.7);
-    return demo?.more ?? `${s.body} (Mock provider: connect Muse Spark for a deeper explanation.)`;
+    return demo?.more ?? `${s.body} (Mock provider: connect Muse Wonder for a deeper explanation.)`;
   }
 }

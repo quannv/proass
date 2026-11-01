@@ -25,7 +25,7 @@ interface ChatRequest {
   jsonSchema?: { name: string; schema: object };
 }
 
-/** Muse Spark via the OpenAI-compatible Chat Completions API (https://dev.meta.ai/docs/protocols/chat-completions). */
+/** Muse LLM (model from MUSE_LLM_MODEL, e.g. muse-wonder-1.0) via the OpenAI-compatible Chat Completions API (https://dev.meta.ai/docs/protocols/chat-completions). */
 export class MuseLLMProvider implements LLMProvider {
   constructor(private readonly opts: MuseLLMOptions) {}
 

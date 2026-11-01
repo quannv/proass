@@ -2,7 +2,7 @@
 
 **A real-time meeting companion that speaks up only when it's worth it.**
 
-Turn it on during a meeting and it transcribes the conversation live with **Muse Voice Transcribe**. **Muse Spark** watches the transcript and, without being asked, surfaces short insight cards: it explains jargon and acronyms, flags claims that look wrong, suggests sharp questions, and captures decisions and action items. When the meeting ends you get a summary, a list of decisions and an action-item checklist, all exportable as Markdown.
+Turn it on during a meeting and it transcribes the conversation live with **Muse Voice Transcribe**. **Muse Wonder** watches the transcript and, without being asked, surfaces short insight cards: it explains jargon and acronyms, flags claims that look wrong, suggests sharp questions, and captures decisions and action items. When the meeting ends you get a summary, a list of decisions and an action-item checklist, all exportable as Markdown.
 
 Built for the Meta Global AI Developer Hackathon.
 
@@ -38,7 +38,7 @@ flowchart LR
   end
   WSC <-->|binary audio ↑ · JSON events ↓| GW
   STT <-->|wss · realtime ASR| MVT[(Muse Voice Transcribe)]
-  LLM -->|chat/completions · json_schema| MS[(Muse Spark 1.3)]
+  LLM -->|chat/completions · json_schema| MS[(Muse Wonder)]
   UI -->|/api/explain · /api/summary| GW
 ```
 
@@ -54,7 +54,7 @@ proass/
 
 ### How the Muse APIs are used
 
-| | Muse Voice Transcribe (`muse-voice-transcribe-1.0`) | Muse Spark 1.3 (`muse-spark-1.3-contributor`) |
+| | Muse Voice Transcribe (`muse-voice-transcribe-1.0`) | Muse Wonder (`muse-wonder-1.0`) |
 |---|---|---|
 | Endpoint | `wss://api.meta.ai/v1/asr/realtime` | `POST https://api.meta.ai/v1/chat/completions` |
 | Auth | `authorization.accessToken` in the first handshake frame | `Authorization: Bearer` header |
@@ -87,7 +87,7 @@ Open http://localhost:3000 and press **Start**, or **Play the sample meeting**.
 |---|---|---|
 | `MUSE_API_KEY` | – | Muse Model API key (server only) |
 | `STT_PROVIDER` / `LLM_PROVIDER` | `muse` if key set, else `mock` | Choose real or mock adapters |
-| `MUSE_LLM_MODEL` | `muse-spark-1.3-contributor` | Use `muse-spark-1.3` for real meetings: in Contributor mode prompts may be used for training |
+| `MUSE_LLM_MODEL` | `muse-wonder-1.0` | Standard mode, so prompts are not used for training. `muse-spark-1.3` is a cheaper alternative (its `-contributor` variant shares prompts for training) |
 | `MUSE_STT_MODE` | `DIARIZATION` | Or `ENDPOINTING` (no speaker labels) |
 | `LLM_SUGGEST_REASONING_EFFORT` / `LLM_DEEP_REASONING_EFFORT` | `minimal` / `low` | Latency vs depth |
 | `ALLOWED_ORIGINS` | `http://localhost:3000` | Comma-separated web origins |
@@ -140,4 +140,4 @@ On Railway or Fly.io, use the Dockerfile, or set the build command to `npm ci &&
 
 - Speaker labels come from Muse diarization (`A`, `B`, …). They restart from `A` after a reconnect because a new STT session begins.
 - Tab audio capture works in Chromium browsers only. System audio from desktop apps (e.g. the Zoom app) cannot be captured from a web page.
-- Muse Spark always reasons; end-to-end insight latency measured on the demo is about 5–7 s after the triggering sentence.
+- Muse models always reason; end-to-end insight latency measured on the demo is about 5–7 s after the triggering sentence.

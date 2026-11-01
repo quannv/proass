@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { TriggerConfig } from "@proass/shared";
+import type { ProviderInfo } from "@proass/shared";
 
 // Load env files if present (apps/server/.env first, then repo-root .env). Real env vars win.
 for (const rel of ["../.env", "../../../.env"]) {
@@ -46,12 +47,19 @@ export const config = {
   sttUrl: env.MUSE_STT_URL || "wss://api.meta.ai/v1/asr/realtime",
   sttModel: env.MUSE_STT_MODEL || "muse-voice-transcribe-1.0",
   sttMode: (env.MUSE_STT_MODE || "DIARIZATION") as "ENDPOINTING" | "DIARIZATION",
-  llmModel: env.MUSE_LLM_MODEL || "muse-spark-1.3-contributor",
-  /** Muse Spark always reasons; "minimal" keeps suggestion latency low. */
+  llmModel: env.MUSE_LLM_MODEL || "muse-wonder-1.0",
+  /** Muse models always reason; "minimal" keeps suggestion latency low. */
   suggestReasoningEffort: env.LLM_SUGGEST_REASONING_EFFORT || "minimal",
   deepReasoningEffort: env.LLM_DEEP_REASONING_EFFORT || "low",
   llmTimeoutMs: Number(env.LLM_TIMEOUT_MS || 25_000),
   triggerOverrides: parseOverrides(env.TRIGGER_OVERRIDES),
+};
+
+/** What the browser is told about the active providers (shown in the top bar). */
+export const providerInfo: ProviderInfo = {
+  stt: config.sttProvider,
+  llm: config.llmProvider,
+  ...(config.llmProvider === "muse" && { llmModel: config.llmModel }),
 };
 
 if ((config.sttProvider === "muse" || config.llmProvider === "muse") && !museApiKey) {

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { FileText, Loader2, Mic, Monitor, Moon, Play, Settings, Sparkles, Square, Sun } from "lucide-react";
-import { STT_LANGUAGES, formatClock } from "@proass/shared";
+import { STT_LANGUAGES, formatClock, modelLabel } from "@proass/shared";
 import { endMeeting, startMeeting, stopMeeting } from "@/lib/controller";
 import { elapsedMs, isRecording, useMeeting } from "@/store/meeting";
 import type { Theme } from "@/store/meeting";
@@ -75,7 +75,7 @@ function ProviderBadge() {
   if (providers === "offline") text = "Offline demo · pre-recorded";
   else if (providers) {
     const stt = providers.stt === "muse" ? "Muse Voice Transcribe" : "Mock STT";
-    const llm = providers.llm === "muse" ? "Muse Spark" : "Mock LLM";
+    const llm = providers.llm === "muse" ? modelLabel(providers.llmModel ?? "Muse") : "Mock LLM";
     text = `${stt} · ${llm}`;
   }
   return <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{text}</p>;
