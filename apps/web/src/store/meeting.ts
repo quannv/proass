@@ -36,6 +36,8 @@ interface MeetingState {
   /** Non-fatal, auto-dismissed message. */
   notice: string | null;
   thinking: boolean;
+  /** Web search query of the current insight call (shown only while thinking). */
+  searching: string | null;
   providers: ProviderInfo | "offline" | null;
   level: number;
 
@@ -94,6 +96,7 @@ export const useMeeting = create<MeetingState>()(
       error: null,
       notice: null,
       thinking: false,
+      searching: null,
       providers: null,
       level: 0,
       ...emptyMeeting,

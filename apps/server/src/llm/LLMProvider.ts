@@ -10,6 +10,8 @@ export interface SuggestionContext {
   enabledTypes: SuggestionType[];
   outputLanguage: string;
   maxItems: number;
+  /** Called when the model runs a web search (lets the UI show what it is looking up). */
+  onSearch?: (query: string) => void;
 }
 
 export interface LLMProvider {

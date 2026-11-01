@@ -45,6 +45,8 @@ export type ServerMessage =
   | { type: "partial"; text: string; speaker?: string }
   | { type: "final"; segment: TranscriptSegment }
   | { type: "thinking"; active: boolean }
+  /** The model is running a web search for this insight call (cleared by thinking: false). */
+  | { type: "searching"; query: string }
   | { type: "suggestions"; items: Suggestion[] }
   | { type: "summary_update"; summary: string }
   | { type: "error"; message: string; retryable: boolean }

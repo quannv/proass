@@ -106,6 +106,7 @@ export class Session {
     if (newSegmentIds.size === 0) return;
     const recent = this.ctx.recent(cfg.windowMs);
     const started = Date.now();
+    let searches = 0;
     this.send({ type: "thinking", active: true });
     try {
       const raw = await llm.generateSuggestions(
@@ -117,6 +118,10 @@ export class Session {
           enabledTypes: this.settings.enabledTypes,
           outputLanguage: this.settings.outputLanguage,
           maxItems: cfg.maxPerCall,
+          onSearch: (query) => {
+            searches++;
+            if (!signal.aborted) this.send({ type: "searching", query });
+          },
         },
         signal,
       );
@@ -128,7 +133,7 @@ export class Session {
         minConfidence: cfg.minConfidence,
         maxItems: cfg.maxPerCall,
       });
-      log(this.id, `suggest: ${raw.length} raw → ${items.length} shown in ${Date.now() - started}ms`);
+      log(this.id, `suggest: ${raw.length} raw → ${items.length} shown in ${Date.now() - started}ms (searches: ${searches})`);
       if (items.length) {
         this.ctx.markShown(items);
         this.send({ type: "suggestions", items });

@@ -10,6 +10,7 @@ Built for the Meta Global AI Developer Hackathon.
 
 - **Live transcript** with partial (gray) and final lines, timestamps and speaker labels (Muse diarization).
 - **Proactive insights**: definition, background, fact check, question to ask, action item, decision, related idea. You can pin, dismiss, copy, ask for "tell me more", or click the quote to jump to that moment in the transcript.
+- **Live web search**: when someone states something time-sensitive (a price, an exchange rate, today's news), the model can call a `web_search` tool. The insight panel shows "Searching: …" and the card cites the live figure. Stable facts and definitions never trigger a search.
 - **Calm by design**: debounced triggers, a minimum interval between calls, de-duplication, confidence filtering and at most one card per type per call.
 - **Audio sources**: microphone (with device picker), a browser tab (Meet/Zoom web/Teams web in Chrome/Edge), mic + tab, or the built-in demo meeting.
 - **End-of-meeting notes**: summary, decisions and action items with owner and due date, plus pinned insights and the full transcript. Export as `.md` or copy.
@@ -59,6 +60,7 @@ proass/
 | Endpoint | `wss://api.meta.ai/v1/asr/realtime` | `POST https://api.meta.ai/v1/chat/completions` |
 | Auth | `authorization.accessToken` in the first handshake frame | `Authorization: Bearer` header |
 | Usage | `DIARIZATION` mode, `CUMULATIVE` partials, raw PCM16 24 kHz binary frames, `keywords` for jargon, `languageBias` from the language picker | Suggestions use `response_format: json_schema` (strict), `reasoning_effort: minimal`. Running summary, "tell me more" and the end-of-meeting summary (strict JSON schema) use `low`. |
+| Web search | – | Insight calls offer a `web_search` function tool (`tool_choice: auto`, max `WEB_SEARCH_MAX` per call). The server runs each query through Muse's built-in `web_search` on the Responses API (`POST /v1/responses`) and returns the result as a `tool` message. |
 | Resilience | Reconnects with backoff, replays the audio since the last final, rotates sessions before the 60-minute cap | One retry on 429/5xx; stale requests are aborted |
 
 ### When does the assistant speak?
@@ -92,6 +94,7 @@ Open http://localhost:3000 and press **Start**, or **Play the sample meeting**.
 | `LLM_SUGGEST_REASONING_EFFORT` / `LLM_DEEP_REASONING_EFFORT` | `minimal` / `low` | Latency vs depth |
 | `ALLOWED_ORIGINS` | `http://localhost:3000` | Comma-separated web origins |
 | `SESSION_SECRET` | random per boot | Set in production so tokens survive restarts |
+| `WEB_SEARCH_MAX` | `1` | Web searches per insight call. A searched card takes ~10 s instead of ~3 s. `0` turns the tool off |
 | `TRIGGER_OVERRIDES` | – | JSON, e.g. `{"minWords":30,"minIntervalMs":12000}` |
 
 ### Scripts

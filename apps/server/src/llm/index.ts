@@ -13,6 +13,7 @@ export const llm: LLMProvider =
         suggestReasoningEffort: config.suggestReasoningEffort,
         deepReasoningEffort: config.deepReasoningEffort,
         timeoutMs: config.llmTimeoutMs,
+        maxSearches: config.webSearchMax,
       });
 
 export type { LLMProvider, SuggestionContext } from "./LLMProvider";

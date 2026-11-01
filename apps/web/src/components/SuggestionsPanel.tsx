@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Check, Copy, Loader2, Pin, PinOff, Sparkles, X } from "lucide-react";
+import { Check, Copy, Globe, Loader2, Pin, PinOff, Sparkles, X } from "lucide-react";
 import { SUGGESTION_TYPE_LABELS, formatClock } from "@proass/shared";
 import { explainSuggestion } from "@/lib/controller";
 import { useMeeting } from "@/store/meeting";
@@ -10,6 +10,7 @@ import { IconButton, Panel, TYPE_META } from "./ui";
 export default function SuggestionsPanel() {
   const suggestions = useMeeting((s) => s.suggestions);
   const thinking = useMeeting((s) => s.thinking);
+  const searching = useMeeting((s) => s.searching);
   const visible = suggestions.filter((s) => !s.dismissed);
   const pinned = visible.filter((s) => s.pinned);
   const rest = visible.filter((s) => !s.pinned);
@@ -23,11 +24,20 @@ export default function SuggestionsPanel() {
         </>
       }
       right={
-        thinking && (
+        thinking &&
+        (searching ? (
+          <span
+            className="inline-flex min-w-0 items-center gap-1.5 text-xs font-medium text-sky-600 dark:text-sky-400"
+            title={`Searching the web: ${searching}`}
+          >
+            <Globe className="h-3.5 w-3.5 shrink-0 animate-pulse" />
+            <span className="max-w-[16rem] truncate">Searching: {searching}</span>
+          </span>
+        ) : (
           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-600 dark:text-violet-400">
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> Thinking…
           </span>
-        )
+        ))
       }
     >
       <div className="min-h-0 flex-1 overflow-y-auto p-3">

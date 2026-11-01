@@ -128,7 +128,10 @@ function handleServerMessage(msg: ServerMessage): void {
       s.addFinal(msg.segment);
       break;
     case "thinking":
-      s.set({ thinking: msg.active });
+      s.set({ thinking: msg.active, searching: null });
+      break;
+    case "searching":
+      s.set({ searching: msg.query });
       break;
     case "suggestions":
       s.addSuggestions(msg.items);

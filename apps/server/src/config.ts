@@ -52,6 +52,8 @@ export const config = {
   suggestReasoningEffort: env.LLM_SUGGEST_REASONING_EFFORT || "minimal",
   deepReasoningEffort: env.LLM_DEEP_REASONING_EFFORT || "low",
   llmTimeoutMs: Number(env.LLM_TIMEOUT_MS || 25_000),
+  /** Web searches allowed per insight call (Muse built-in search); 0 turns the web_search tool off. */
+  webSearchMax: Number(env.WEB_SEARCH_MAX ?? 1),
   triggerOverrides: parseOverrides(env.TRIGGER_OVERRIDES),
 };
 
