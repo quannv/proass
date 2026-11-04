@@ -10,14 +10,14 @@ Built for the Meta Global AI Developer Hackathon.
 
 ## Features
 
-- **Live transcript** with partial (gray) and final lines, timestamps and speaker labels (Muse diarization).
+- **Live transcript** with partial (gray) and final lines and timestamps, grouped into turns by speaker (Muse diarization). Each speaker gets a coloured avatar and a share-of-talk bar; click a name to rename "Speaker A" to a real name, and insights, summaries and the export use it.
 - **Proactive insights**: definition, background, fact check, question to ask, action item, decision, related idea. You can pin, dismiss, copy, ask for "tell me more", or click the quote to jump to that moment in the transcript.
 - **Live web search**: when someone states something time-sensitive (a price, an exchange rate, today's news), the model can call a `web_search` tool. The insight panel shows "Searching: …" and the card cites the live figure. Stable facts and definitions never trigger a search.
 - **Calm by design**: debounced triggers, a minimum interval between calls, one call at a time, de-duplication, confidence filtering and at most one card per type per call.
 - **Audio sources**: microphone (with device picker), a browser tab (Meet/Zoom web/Teams web in Chrome/Edge), mic + tab, or the built-in demo meeting.
 - **End-of-meeting notes**: summary, decisions and action items with owner and due date, plus pinned insights and the full transcript. Export as `.md` or copy.
 - **Resilient**: the browser-to-server and server-to-Muse links both reconnect automatically. Audio captured while disconnected is buffered and replayed. A half-spoken line is kept when a connection drops. The transcript survives page reloads (stored in the browser only).
-- **Demo mode**: a 2.5-minute scripted meeting (4 voices). It can run through the live Muse pipeline, or fully **offline** with a pre-recorded transcript and insights for bad conference Wi-Fi.
+- **Demo mode**: a 2.5-minute scripted meeting with 4 voices: the Viettrans.info team planning how to fund machine translation for Vietnam's ethnic minority languages. In the live demo the diarized speakers are named automatically by matching their lines to the script. It can run through the live Muse pipeline, or fully **offline** with a pre-recorded transcript and insights for bad conference Wi-Fi.
 - **Privacy**: API keys stay on the server; there is no server-side storage; a visible REC indicator and a consent reminder are shown.
 - Light and dark mode, responsive layout (panels stack on mobile).
 
@@ -145,8 +145,8 @@ On Railway or Fly.io, use the Dockerfile, or set the build command to `npm ci &&
 ## Demo tips
 
 1. In **Settings → Audio source**, choose **Demo meeting**. Keep **Offline mode** off to show the live Muse pipeline; turn it on if the network is unreliable.
-2. Insights to point out: the SOC 2 Type 1/2 definition, p95 explained (even though the STT heard "page 95"), the **GDPR fact check** (€20M / 4% vs the claimed €1M), decisions and action items.
-3. To show live web search, switch to the microphone and say something time-sensitive, e.g. *"Bitcoin is trading at about fifty thousand dollars today."* The panel shows "Searching: …" and a fact-check card cites the current price about 10–15 s later.
+2. Insights to point out: the **population fact check** (ethnic minorities are about 14.7% of Vietnam, not "2%"), NLLB and back-translation, BLEU vs chrF, consent for community data, the decision and the three action items.
+3. **Live web search**: Quang converts a $50,000 grant at "twenty thousand dong to the dollar". The panel shows "Searching: …" and, 10–15 s later, a fact-check card with today's rate (about 1.3 billion dong). This happens in the live pipeline only; offline mode shows a pre-recorded card dated 4 Nov 2026.
 4. Click an insight's quote to jump to the transcript, and use **Tell me more**.
 5. Click **End & summarize**, then **Export .md**.
 

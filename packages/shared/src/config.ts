@@ -80,6 +80,11 @@ export const SessionSettingsSchema = z.object({
   spokenLanguages: z.array(z.enum(STT_LANGUAGES)).max(5),
   /** Domain terms the STT might mishear (STT `keywords`). */
   keywords: z.array(z.string().trim().min(1).max(60)).max(100),
+  /** Names the user gave diarized speakers, e.g. { "A": "Lan" }, so insights and summaries use real names. */
+  speakerNames: z
+    .record(z.string().max(8), z.string().trim().min(1).max(40).regex(/^[^\r\n:]+$/))
+    .refine((o) => Object.keys(o).length <= 26)
+    .optional(),
 });
 export type SessionSettings = z.infer<typeof SessionSettingsSchema>;
 

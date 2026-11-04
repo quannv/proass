@@ -3,22 +3,24 @@ import { useState } from "react";
 import { AlertTriangle, ArrowLeft, Check, ChevronDown, Clipboard, Download, Gavel, ListTodo, Loader2, Pin, Plus, RotateCw } from "lucide-react";
 import { DEMO_TITLE, SUGGESTION_TYPE_LABELS, formatClock } from "@proass/shared";
 import { generateSummary, newMeeting } from "@/lib/controller";
-import { buildMarkdown, downloadText, speakerName } from "@/lib/export";
+import { buildMarkdown, downloadText } from "@/lib/export";
 import { elapsedMs, useMeeting } from "@/store/meeting";
-import { TYPE_META, speakerColor } from "./ui";
+import { Avatar, SpeakerName, useSpeakers } from "./speakers";
+import { TYPE_META } from "./ui";
 
 export default function SummaryView() {
   const summary = useMeeting((s) => s.summary);
   const segments = useMeeting((s) => s.segments);
   const suggestions = useMeeting((s) => s.suggestions);
   const isDemo = useMeeting((s) => s.settings.source === "demo");
+  const speakers = useSpeakers();
   const set = useMeeting((s) => s.set);
   const [copied, setCopied] = useState(false);
   const durationMs = Math.max(elapsedMs(useMeeting.getState()), segments.at(-1)?.endMs ?? 0);
   const title = isDemo ? DEMO_TITLE : "Meeting notes";
   const pinned = suggestions.filter((s) => s.pinned);
 
-  const markdown = () => buildMarkdown({ title, date: new Date(), durationMs, summary: summary.data, suggestions, segments });
+  const markdown = () => buildMarkdown({ title, date: new Date(), durationMs, summary: summary.data, suggestions, segments, speakers });
   const copy = async () => {
     await navigator.clipboard.writeText(markdown());
     setCopied(true);
@@ -139,10 +141,13 @@ export default function SummaryView() {
           <ol className="space-y-1.5 border-t border-zinc-100 px-5 py-4 text-sm dark:border-zinc-800">
             {segments.map((s) => (
               <li key={s.id} className="grid grid-cols-[3.25rem_1fr] gap-2">
-                <time className="font-mono text-xs text-zinc-400">{formatClock(s.startMs)}</time>
-                <p>
-                  {s.speaker && <span className={`mr-1.5 text-xs font-semibold ${speakerColor(s.speaker)}`}>{speakerName(s.speaker)}</span>}
-                  {s.text}
+                <time className="pt-0.5 font-mono text-xs text-zinc-400">{formatClock(s.startMs)}</time>
+                <p className="flex items-start gap-2">
+                  {s.speaker && speakers.get(s.speaker) && <Avatar speaker={speakers.get(s.speaker)} size="sm" />}
+                  <span>
+                    {s.speaker && speakers.get(s.speaker) && <SpeakerName speaker={speakers.get(s.speaker)!} className="mr-1.5" />}
+                    {s.text}
+                  </span>
                 </p>
               </li>
             ))}

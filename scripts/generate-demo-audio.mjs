@@ -18,7 +18,7 @@ const RATE = 24_000;
 const BYTES_PER_MS = (RATE * 2) / 1000;
 const LEAD_IN_MS = 800;
 const GAP_SAME_SPEAKER_MS = 450;
-const GAP_NEW_SPEAKER_MS = 750;
+const GAP_NEW_SPEAKER_MS = 1100; // long enough for diarization to split similar voices
 
 /** Returns the PCM payload of a WAV file (skips RIFF chunks until "data"). */
 function wavData(buf) {

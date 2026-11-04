@@ -27,7 +27,7 @@ let lastFinalAt = 0;
 ws.on("open", () => {
   ws.send(JSON.stringify({
     type: "start",
-    settings: { frequency: "medium", enabledTypes: ["definition", "background", "fact_check", "question_to_ask", "action_item", "decision", "related_idea"], outputLanguage: "auto", spokenLanguages: ["English"], keywords: ["SOC 2", "p95", "RAG", "GDPR", "DPA"] },
+    settings: { frequency: "medium", enabledTypes: ["definition", "background", "fact_check", "question_to_ask", "action_item", "decision", "related_idea"], outputLanguage: "auto", spokenLanguages: ["English"], keywords: ["Viettrans.info", "Tay", "Hmong", "NLLB", "BLEU", "chrF", "back translation", "parallel corpus", "Ha Giang", "Cao Bang", "dong"] },
     resume: { elapsedMs: 0, segments: [], summary: "", shown: [] },
   }));
 });

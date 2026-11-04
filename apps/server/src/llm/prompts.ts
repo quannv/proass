@@ -1,4 +1,4 @@
-import { SUGGESTION_TYPE_LABELS, formatClock } from "@proass/shared";
+import { SUGGESTION_TYPE_LABELS, formatClock, isSpeakerLabel } from "@proass/shared";
 import type { RawSuggestion, TranscriptSegment } from "@proass/shared";
 import type { SuggestionContext } from "./LLMProvider";
 
@@ -16,10 +16,10 @@ function languageLine(language: string): string {
     : `Write titles and bodies in ${language}, even if the conversation uses another language. Keep trigger_quote in the original language.`;
 }
 
-/** Diarization labels ("A", "B") read better to the model as "Speaker A". */
+/** Diarization labels ("A", "B") read better to the model as "Speaker A"; names pass through. */
 function who(speaker?: string): string {
   if (!speaker) return "";
-  return speaker.length <= 2 ? ` Speaker ${speaker}:` : ` ${speaker}:`;
+  return isSpeakerLabel(speaker) ? ` Speaker ${speaker}:` : ` ${speaker}:`;
 }
 
 export function formatTranscript(segments: Pick<TranscriptSegment, "text" | "speaker" | "startMs">[]): string {

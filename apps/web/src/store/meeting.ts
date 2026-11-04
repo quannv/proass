@@ -52,6 +52,8 @@ interface MeetingState {
   partial: { text: string; speaker?: string } | null;
   suggestions: SuggestionView[];
   runningSummary: string;
+  /** Names typed for diarized speakers ("A" → "Lan"); belongs to this meeting. */
+  speakerNames: Record<string, string>;
   highlight: { segmentId: string; at: number } | null;
   view: "meeting" | "summary";
   summary: SummaryState;
@@ -63,6 +65,8 @@ interface MeetingState {
   promotePartial(): void;
   addSuggestions(items: Suggestion[]): void;
   patchSuggestion(id: string, patch: Partial<SuggestionView>): void;
+  /** Empty name clears it (back to the automatic name). */
+  renameSpeaker(label: string, name: string): void;
   highlightSegment(id: string): void;
   resetMeeting(): void;
 }
@@ -75,6 +79,7 @@ const emptyMeeting = {
   partial: null,
   suggestions: [],
   runningSummary: "",
+  speakerNames: {},
   highlight: null,
   view: "meeting" as const,
   summary: { status: "idle" as const },
@@ -162,6 +167,11 @@ export const useMeeting = create<MeetingState>()(
         set({ suggestions: [...items.map((s) => ({ ...s, pinned: false, dismissed: false })), ...get().suggestions] }),
       patchSuggestion: (id, patch) =>
         set({ suggestions: get().suggestions.map((s) => (s.id === id ? { ...s, ...patch } : s)) }),
+      renameSpeaker: (label, name) => {
+        const { [label]: _, ...rest } = get().speakerNames;
+        const clean = name.replace(/[\r\n:]/g, " ").trim().slice(0, 40);
+        set({ speakerNames: clean ? { ...rest, [label]: clean } : rest });
+      },
       highlightSegment: (id) => set({ highlight: { segmentId: id, at: Date.now() } }),
       resetMeeting: () => set({ ...emptyMeeting }),
     }),
@@ -178,6 +188,7 @@ export const useMeeting = create<MeetingState>()(
           explanation: explanation?.status === "done" ? explanation : undefined,
         })),
         runningSummary: s.runningSummary,
+        speakerNames: s.speakerNames,
         audioMs: s.audioMs,
         elapsedBeforeRunMs: s.elapsedBeforeRunMs,
         view: s.view,

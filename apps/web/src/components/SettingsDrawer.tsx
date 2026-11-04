@@ -13,7 +13,7 @@ const SOURCES: { id: AudioSource; label: string; hint: string; icon: typeof Mic 
   { id: "mic", label: "Microphone", hint: "In-person meetings", icon: Mic },
   { id: "tab", label: "Browser tab", hint: "Meet, Zoom web, Teams web (Chrome/Edge)", icon: Monitor },
   { id: "mic+tab", label: "Mic + tab", hint: "Online meeting incl. your voice; use headphones", icon: MonitorSpeaker },
-  { id: "demo", label: "Demo meeting", hint: "Scripted 2.5-minute sample", icon: Play },
+  { id: "demo", label: "Demo meeting", hint: "2.5-minute sample: funding minority-language MT", icon: Play },
 ];
 
 export default function SettingsDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {

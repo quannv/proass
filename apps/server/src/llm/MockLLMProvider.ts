@@ -63,7 +63,7 @@ export class MockLLMProvider implements LLMProvider {
   async summarizeMeeting(segments: Pick<TranscriptSegment, "text" | "speaker" | "startMs">[], _language: string, signal: AbortSignal): Promise<MeetingSummary> {
     await sleep(900, signal);
     const all = segments.map((s) => s.text).join(" ");
-    if (quoteCoverage("SOC 2 Type 2 design partner program GDPR", all) >= 0.8) return DEMO_SUMMARY;
+    if (quoteCoverage("grant compute credits crowdfunding consent form", all) >= 0.8) return DEMO_SUMMARY;
     const speakers = new Set(segments.map((s) => s.speaker).filter(Boolean));
     return {
       summary: `Mock summary: a discussion with ${speakers.size || "several"} speaker(s) across ${segments.length} transcript lines. Connect Muse Wonder (LLM_PROVIDER=muse) for a real summary.`,

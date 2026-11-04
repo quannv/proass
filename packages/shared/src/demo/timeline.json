@@ -1,113 +1,119 @@
 {
-  "durationMs": 143066,
+  "durationMs": 150391,
   "lines": [
     {
-      "speaker": "Maya",
-      "text": "Okay everyone, thanks for joining. The goal today is to decide whether we can launch the enterprise tier in the first week of December.",
+      "speaker": "Lan",
+      "text": "Thanks for joining, everyone. Today we need to agree on how to fund the next phase of Viettrans.info: machine translation for the ethnic minority languages of Vietnam.",
       "startMs": 800,
-      "endMs": 8338
+      "endMs": 10578
     },
     {
-      "speaker": "Alex",
-      "text": "From the sales side, three of our biggest prospects keep asking the same thing. They will not sign until we have SOC 2 Type 2.",
-      "startMs": 9088,
-      "endMs": 17537
+      "speaker": "Hoa",
+      "text": "Some context first. Vietnam officially recognizes fifty four ethnic groups, and many of their languages have almost no text online.",
+      "startMs": 11678,
+      "endMs": 20393
     },
     {
-      "speaker": "Priya",
-      "text": "Right. We finished the Type 1 report last month, but Type 2 needs an observation window. Usually that is at least three months of evidence.",
-      "startMs": 18287,
-      "endMs": 26957
+      "speaker": "Quang",
+      "text": "To be honest, minorities are only about two percent of the population, so funders may see this as a niche problem.",
+      "startMs": 21493,
+      "endMs": 28649
     },
     {
-      "speaker": "Daniel",
-      "text": "On the engineering side, the main risk is latency. Our p95 for the search endpoint is around eight hundred milliseconds, and the target in the contract draft is three hundred.",
-      "startMs": 27707,
-      "endMs": 38612
+      "speaker": "Lan",
+      "text": "I don't think that number is right. Let's check it before it goes into any proposal.",
+      "startMs": 29749,
+      "endMs": 34169
     },
     {
-      "speaker": "Maya",
-      "text": "What is driving that? Is it the retrieval step?",
-      "startMs": 39362,
-      "endMs": 42305
+      "speaker": "Minh",
+      "text": "On the technical side, these are low resource languages. For Tay and Hmong we have maybe twenty thousand sentence pairs of parallel corpus, mostly from bilingual textbooks.",
+      "startMs": 35269,
+      "endMs": 45373
     },
     {
-      "speaker": "Daniel",
-      "text": "Mostly, yes. The RAG pipeline calls the vector database twice. If we add a cache in front of the re-ranker, we could probably cut it in half.",
-      "startMs": 43055,
-      "endMs": 52573
+      "speaker": "Minh",
+      "text": "My plan is to fine tune Meta's NLLB model, then use back translation to create more training data from text that only exists in the minority language.",
+      "startMs": 45823,
+      "endMs": 54859
     },
     {
-      "speaker": "Alex",
-      "text": "One more thing. A prospect in Germany asked about GDPR. I told them the maximum fine is one million euros, so the risk is small.",
-      "startMs": 53323,
-      "endMs": 63140
+      "speaker": "Lan",
+      "text": "How will we know if the translations are good enough for real users?",
+      "startMs": 55959,
+      "endMs": 59208
     },
     {
-      "speaker": "Priya",
-      "text": "Hmm, I am not sure that is right. We should double check before we put anything in writing.",
-      "startMs": 63890,
-      "endMs": 69113
+      "speaker": "Minh",
+      "text": "We will report BLEU and chrF scores, and native speakers will rate a sample of translations every month.",
+      "startMs": 60308,
+      "endMs": 66685
     },
     {
-      "speaker": "Maya",
-      "text": "Agreed. Let's not make legal claims on sales calls. Priya, can you send Alex the correct summary?",
-      "startMs": 69863,
-      "endMs": 76273
+      "speaker": "Hoa",
+      "text": "Native speakers are key. Village teachers in Ha Giang and Cao Bang already offered to help, but we need consent forms and a fair way to pay them.",
+      "startMs": 67785,
+      "endMs": 76722
     },
     {
-      "speaker": "Priya",
-      "text": "Sure. I will send it by Thursday, together with our draft DPA.",
-      "startMs": 77023,
-      "endMs": 81428
+      "speaker": "Quang",
+      "text": "On funding, we have three options: an AI for good grant, cloud compute credits, and a crowdfunding campaign in the community.",
+      "startMs": 77822,
+      "endMs": 85986
     },
     {
-      "speaker": "Maya",
-      "text": "Good. So, on the launch date. Given the SOC 2 timeline, I suggest we run a design partner program in December, and do the full launch in Q1.",
-      "startMs": 82178,
-      "endMs": 91671
+      "speaker": "Quang",
+      "text": "The grant I have in mind gives fifty thousand US dollars. With the dollar at about twenty thousand dong, that is one billion dong.",
+      "startMs": 86436,
+      "endMs": 94201
     },
     {
-      "speaker": "Daniel",
-      "text": "That works for engineering. It gives us time for the caching work and a proper load test.",
-      "startMs": 92421,
-      "endMs": 97769
+      "speaker": "Lan",
+      "text": "Let's double check that rate. Either way, the grant should cover data collection and paying the speakers first.",
+      "startMs": 95301,
+      "endMs": 100914
     },
     {
-      "speaker": "Alex",
-      "text": "I can live with that, as long as design partners get a discount and early access.",
-      "startMs": 98519,
-      "endMs": 103645
+      "speaker": "Minh",
+      "text": "And compute credits can cover training. Fine tuning a distilled model should only need a few hundred GPU hours.",
+      "startMs": 102014,
+      "endMs": 108484
     },
     {
-      "speaker": "Maya",
-      "text": "Okay, decision then. We go with a design partner program in December, and general availability in the first quarter. Daniel, please own the latency fix.",
-      "startMs": 104395,
-      "endMs": 114168
+      "speaker": "Hoa",
+      "text": "One more thing. The communities should own their data, so I suggest we release the corpus under an open license, with credit to every village that contributes.",
+      "startMs": 109584,
+      "endMs": 119306
     },
     {
-      "speaker": "Daniel",
-      "text": "Will do. I will share a plan with the p95 numbers by next Tuesday.",
-      "startMs": 114918,
-      "endMs": 119852
+      "speaker": "Lan",
+      "text": "Okay, decision. We apply for the grant first, ask for compute credits in parallel, and keep crowdfunding as a backup for next year.",
+      "startMs": 120406,
+      "endMs": 128399
     },
     {
-      "speaker": "Maya",
-      "text": "Great. Last topic, pricing. Alex, what are you seeing on churn?",
-      "startMs": 120602,
-      "endMs": 125471
+      "speaker": "Quang",
+      "text": "I will draft the grant proposal and the budget by next Friday.",
+      "startMs": 129499,
+      "endMs": 133100
     },
     {
-      "speaker": "Alex",
-      "text": "Net revenue retention is about one hundred and eight percent, but small teams churn right after the trial. Maybe we need usage based pricing for them.",
-      "startMs": 126221,
-      "endMs": 135728
+      "speaker": "Hoa",
+      "text": "I will prepare the consent form and call the teachers in Ha Giang this week.",
+      "startMs": 134200,
+      "endMs": 138424
     },
     {
-      "speaker": "Maya",
-      "text": "Interesting. Let's put that on the agenda for next week. Thanks, everyone.",
-      "startMs": 136478,
-      "endMs": 141566
+      "speaker": "Minh",
+      "text": "And I will share a baseline chrF score for Tay by the end of the month.",
+      "startMs": 139524,
+      "endMs": 143812
+    },
+    {
+      "speaker": "Lan",
+      "text": "Great work. Let's meet again next Monday. Thanks, everyone.",
+      "startMs": 144912,
+      "endMs": 148891
     }
   ]
 }

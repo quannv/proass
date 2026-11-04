@@ -1,6 +1,8 @@
 import { SUGGESTION_TYPE_LABELS, formatClock } from "@proass/shared";
 import type { MeetingSummary, TranscriptSegment } from "@proass/shared";
 import type { SuggestionView } from "@/store/meeting";
+import { displayName } from "./speakers";
+import type { SpeakerMap } from "./speakers";
 
 export function buildMarkdown(opts: {
   title: string;
@@ -9,6 +11,7 @@ export function buildMarkdown(opts: {
   summary?: MeetingSummary;
   suggestions: SuggestionView[];
   segments: TranscriptSegment[];
+  speakers: SpeakerMap;
 }): string {
   const { summary } = opts;
   const out: string[] = [
@@ -35,14 +38,13 @@ export function buildMarkdown(opts: {
     for (const s of kept) out.push(`- **${SUGGESTION_TYPE_LABELS[s.type]}: ${s.title}** — ${s.body}`);
     out.push("");
   }
+  const speakers = [...opts.speakers.values()];
+  if (speakers.some((s) => s.named)) {
+    out.push("## Participants", "", ...speakers.map((s) => `- ${s.name}${s.role ? ` (${s.role})` : ""}`), "");
+  }
   out.push("## Transcript", "");
-  for (const s of opts.segments) out.push(`**[${formatClock(s.startMs)}]${s.speaker ? ` ${speakerName(s.speaker)}` : ""}:** ${s.text}  `);
+  for (const s of opts.segments) out.push(`**[${formatClock(s.startMs)}]${s.speaker ? ` ${displayName(s.speaker, opts.speakers)}` : ""}:** ${s.text}  `);
   return out.join("\n") + "\n";
-}
-
-/** Diarization gives "A", "B"…; show those as "Speaker A". Named speakers pass through. */
-export function speakerName(label: string): string {
-  return label.length <= 2 ? `Speaker ${label}` : label;
 }
 
 export function downloadText(filename: string, text: string, type = "text/markdown"): void {

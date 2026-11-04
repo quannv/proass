@@ -1,151 +1,162 @@
 {
-  "title": "Enterprise tier launch sync",
+  "title": "Viettrans.info: funding machine translation for minority languages",
   "speakers": {
-    "Maya": { "voice": "Samantha", "role": "Product manager" },
-    "Alex": { "voice": "Alex", "role": "Sales lead" },
-    "Priya": { "voice": "Veena", "role": "Security & compliance" },
-    "Daniel": { "voice": "Daniel", "role": "Engineering lead" }
+    "Lan": { "voice": "Samantha", "role": "Project lead" },
+    "Minh": { "voice": "Daniel", "role": "ML engineer" },
+    "Hoa": { "voice": "Tessa", "role": "Community partnerships" },
+    "Quang": { "voice": "Rishi", "role": "Fundraising" }
   },
   "lines": [
-    { "speaker": "Maya", "text": "Okay everyone, thanks for joining. The goal today is to decide whether we can launch the enterprise tier in the first week of December." },
-    { "speaker": "Alex", "text": "From the sales side, three of our biggest prospects keep asking the same thing. They will not sign until we have SOC 2 Type 2." },
-    { "speaker": "Priya", "text": "Right. We finished the Type 1 report last month, but Type 2 needs an observation window. Usually that is at least three months of evidence." },
-    { "speaker": "Daniel", "text": "On the engineering side, the main risk is latency. Our p95 for the search endpoint is around eight hundred milliseconds, and the target in the contract draft is three hundred." },
-    { "speaker": "Maya", "text": "What is driving that? Is it the retrieval step?" },
-    { "speaker": "Daniel", "text": "Mostly, yes. The RAG pipeline calls the vector database twice. If we add a cache in front of the re-ranker, we could probably cut it in half." },
-    { "speaker": "Alex", "text": "One more thing. A prospect in Germany asked about GDPR. I told them the maximum fine is one million euros, so the risk is small." },
-    { "speaker": "Priya", "text": "Hmm, I am not sure that is right. We should double check before we put anything in writing." },
-    { "speaker": "Maya", "text": "Agreed. Let's not make legal claims on sales calls. Priya, can you send Alex the correct summary?" },
-    { "speaker": "Priya", "text": "Sure. I will send it by Thursday, together with our draft DPA." },
-    { "speaker": "Maya", "text": "Good. So, on the launch date. Given the SOC 2 timeline, I suggest we run a design partner program in December, and do the full launch in Q1." },
-    { "speaker": "Daniel", "text": "That works for engineering. It gives us time for the caching work and a proper load test." },
-    { "speaker": "Alex", "text": "I can live with that, as long as design partners get a discount and early access." },
-    { "speaker": "Maya", "text": "Okay, decision then. We go with a design partner program in December, and general availability in the first quarter. Daniel, please own the latency fix." },
-    { "speaker": "Daniel", "text": "Will do. I will share a plan with the p95 numbers by next Tuesday." },
-    { "speaker": "Maya", "text": "Great. Last topic, pricing. Alex, what are you seeing on churn?" },
-    { "speaker": "Alex", "text": "Net revenue retention is about one hundred and eight percent, but small teams churn right after the trial. Maybe we need usage based pricing for them." },
-    { "speaker": "Maya", "text": "Interesting. Let's put that on the agenda for next week. Thanks, everyone." }
+    { "speaker": "Lan", "text": "Thanks for joining, everyone. Today we need to agree on how to fund the next phase of Viettrans.info: machine translation for the ethnic minority languages of Vietnam." },
+    { "speaker": "Hoa", "text": "Some context first. Vietnam officially recognizes fifty four ethnic groups, and many of their languages have almost no text online." },
+    { "speaker": "Quang", "text": "To be honest, minorities are only about two percent of the population, so funders may see this as a niche problem." },
+    { "speaker": "Lan", "text": "I don't think that number is right. Let's check it before it goes into any proposal." },
+    { "speaker": "Minh", "text": "On the technical side, these are low resource languages. For Tay and Hmong we have maybe twenty thousand sentence pairs of parallel corpus, mostly from bilingual textbooks." },
+    { "speaker": "Minh", "text": "My plan is to fine tune Meta's NLLB model, then use back translation to create more training data from text that only exists in the minority language." },
+    { "speaker": "Lan", "text": "How will we know if the translations are good enough for real users?" },
+    { "speaker": "Minh", "text": "We will report BLEU and chrF scores, and native speakers will rate a sample of translations every month." },
+    { "speaker": "Hoa", "text": "Native speakers are key. Village teachers in Ha Giang and Cao Bang already offered to help, but we need consent forms and a fair way to pay them." },
+    { "speaker": "Quang", "text": "On funding, we have three options: an AI for good grant, cloud compute credits, and a crowdfunding campaign in the community." },
+    { "speaker": "Quang", "text": "The grant I have in mind gives fifty thousand US dollars. With the dollar at about twenty thousand dong, that is one billion dong." },
+    { "speaker": "Lan", "text": "Let's double check that rate. Either way, the grant should cover data collection and paying the speakers first." },
+    { "speaker": "Minh", "text": "And compute credits can cover training. Fine tuning a distilled model should only need a few hundred GPU hours." },
+    { "speaker": "Hoa", "text": "One more thing. The communities should own their data, so I suggest we release the corpus under an open license, with credit to every village that contributes." },
+    { "speaker": "Lan", "text": "Okay, decision. We apply for the grant first, ask for compute credits in parallel, and keep crowdfunding as a backup for next year." },
+    { "speaker": "Quang", "text": "I will draft the grant proposal and the budget by next Friday." },
+    { "speaker": "Hoa", "text": "I will prepare the consent form and call the teachers in Ha Giang this week." },
+    { "speaker": "Minh", "text": "And I will share a baseline chrF score for Tay by the end of the month." },
+    { "speaker": "Lan", "text": "Great work. Let's meet again next Monday. Thanks, everyone." }
   ],
   "suggestions": [
     {
-      "afterLine": 2,
-      "type": "definition",
-      "title": "SOC 2 Type 1 vs Type 2",
-      "body": "Type 1 checks that security controls are designed correctly at one point in time. Type 2 tests that they actually operated over an observation period, typically 3 to 12 months, which is why enterprise buyers prefer it.",
-      "trigger_quote": "until we have SOC 2 Type 2",
-      "confidence": 0.92,
-      "more": "SOC 2 is an AICPA attestation framework built on five Trust Services Criteria: security, availability, processing integrity, confidentiality and privacy. A Type 2 report can only be issued after the observation window ends, so the earliest realistic date depends on when evidence collection started. Some teams shorten the first window to three months to unblock deals, then move to a 12-month cycle."
+      "afterLine": 1,
+      "type": "background",
+      "title": "Vietnam's 54 ethnic groups",
+      "body": "The Kinh majority is about 85% of the population. The other 53 groups total about 14 million people (2019 census); Tay, Thai, Muong, Hmong and Khmer each number over a million people.",
+      "trigger_quote": "Vietnam officially recognizes fifty four ethnic groups",
+      "confidence": 0.86,
+      "more": "Vietnam's 2019 Population and Housing Census counted about 96.2 million people. The 53 ethnic minority groups made up roughly 14.1 million (about 14.7%). The largest were Tay (about 1.85 million), Thai (1.82 million), Muong (1.45 million), Hmong (1.39 million) and Khmer (1.32 million). Many smaller groups have only a few thousand members, and several languages have little or no written material online."
     },
     {
-      "afterLine": 3,
+      "afterLine": 2,
+      "type": "fact_check",
+      "title": "Minorities are about 15%, not 2%",
+      "body": "Vietnam's 2019 census counted about 14.1 million people from the 53 ethnic minority groups, roughly 14.7% of the population. That is a strong number for a funding proposal, not a niche.",
+      "trigger_quote": "minorities are only about two percent of the population",
+      "confidence": 0.95,
+      "more": "Source: Vietnam's 2019 Population and Housing Census (General Statistics Office and the Committee for Ethnic Minority Affairs). About 14.1 million of 96.2 million people belong to ethnic minorities. Framing the project around reaching more than 14 million people, many in remote northern and Central Highlands provinces, makes the impact case far stronger."
+    },
+    {
+      "afterLine": 4,
       "type": "definition",
-      "title": "What p95 latency means",
-      "body": "95% of requests finish faster than this number; the slowest 5% take longer. It captures tail latency that averages hide, which is why contracts often specify p95 or p99.",
-      "trigger_quote": "Our p95 for the search endpoint",
-      "confidence": 0.9,
-      "more": "If p95 is 800 ms, one in twenty searches takes at least 800 ms. Tail latency usually comes from the slowest dependency in a request (here, possibly the vector database or re-ranker), from cold caches, or from garbage-collection pauses. Measure p95 per pipeline stage to find the dominant contributor before optimizing."
+      "title": "Low-resource languages",
+      "body": "Languages without enough digital text, especially parallel (translated) sentence pairs, to train translation models the usual way. Major language pairs have millions of pairs; 20,000 is very small.",
+      "trigger_quote": "these are low resource languages",
+      "confidence": 0.88,
+      "more": "A parallel corpus is a set of sentences paired with their translations. Strong systems for major languages train on tens of millions of pairs. With around 20,000, the usual approach is to start from a multilingual pretrained model, add synthetic data (back-translation), and collect more high-quality pairs from native speakers in the domains users care about."
     },
     {
       "afterLine": 5,
       "type": "definition",
-      "title": "RAG and re-ranking",
-      "body": "Retrieval-Augmented Generation fetches relevant documents before the model answers. A re-ranker re-scores retrieved results by relevance; caching its output for repeated queries avoids recomputing expensive scores.",
-      "trigger_quote": "The RAG pipeline calls the vector database twice",
-      "confidence": 0.86,
-      "more": "A typical RAG search does: embed the query, run an approximate nearest-neighbour search in a vector database, then re-rank the top results with a heavier cross-encoder model. Re-ranking is often the slowest step. Caching by normalized query, or merging the two vector database calls into one, are common first wins."
+      "title": "NLLB and back-translation",
+      "body": "NLLB (No Language Left Behind) is Meta's open translation model family covering 200 languages. Back-translation turns monolingual text into synthetic training pairs by translating it with the current model.",
+      "trigger_quote": "fine tune Meta's NLLB model, then use back translation",
+      "confidence": 0.87,
+      "more": "NLLB-200 was released by Meta AI in 2022, with distilled versions small enough to fine-tune on a single GPU. Back-translation works like this: translate text written in Tay or Hmong into Vietnamese with your current model, then train on those synthetic pairs in the Vietnamese-to-minority direction. Because the target side is real human text, output fluency improves even though the source side is machine-made."
     },
     {
-      "afterLine": 6,
-      "type": "fact_check",
-      "title": "GDPR fines are far higher",
-      "body": "Under GDPR Article 83, serious infringements can be fined up to €20 million or 4% of global annual turnover, whichever is higher. €1 million is not the maximum.",
-      "trigger_quote": "the maximum fine is one million euros",
-      "confidence": 0.94,
-      "more": "GDPR has two fine tiers: up to €10 million or 2% of worldwide annual turnover for lighter infringements, and up to €20 million or 4% for violations of core principles such as lawful basis or data subject rights. Regulators have issued fines well above €1 million, so this claim should be corrected with the prospect."
+      "afterLine": 5,
+      "type": "question_to_ask",
+      "title": "Does NLLB's licence fit our plans?",
+      "body": "The NLLB-200 weights are released under CC BY-NC 4.0, which forbids commercial use. That fits a community project, but ask whether any paid service or partner deal is planned.",
+      "trigger_quote": "fine tune Meta's NLLB model",
+      "confidence": 0.78,
+      "more": "A fine-tuned model is generally treated as a derivative of the original weights, so the non-commercial terms carry over. If Viettrans.info later wants paid API access or a commercial partner, it would need a model with a more permissive licence or separate permission. Settling this before the grant application avoids surprises."
     },
     {
       "afterLine": 7,
-      "type": "question_to_ask",
-      "title": "Should legal review sales answers?",
-      "body": "You could ask whether there is an approved FAQ for compliance questions, so sales can answer GDPR and security questions consistently without improvising.",
-      "trigger_quote": "We should double check before we put anything in writing",
-      "confidence": 0.72,
-      "more": "Many B2B companies maintain a security and compliance FAQ or a trust center page reviewed by legal. It speeds up deals, avoids conflicting statements, and reduces the risk of a misstatement ending up in a contract."
-    },
-    {
-      "afterLine": 9,
       "type": "definition",
-      "title": "DPA: Data Processing Agreement",
-      "body": "A contract required by GDPR Article 28 between a customer (data controller) and a vendor (data processor), defining how personal data is handled, secured and deleted.",
-      "trigger_quote": "together with our draft DPA",
-      "confidence": 0.88,
-      "more": "A DPA typically covers the subject matter and duration of processing, security measures, sub-processors, breach notification timelines, and data transfer mechanisms such as Standard Contractual Clauses for transfers outside the EU. German customers in particular often request one before signing."
+      "title": "BLEU vs chrF",
+      "body": "BLEU counts matching word sequences against a reference translation. chrF compares character sequences, so it gives partial credit for close word forms and spelling variants, which suits low-resource languages better.",
+      "trigger_quote": "We will report BLEU and chrF scores",
+      "confidence": 0.86,
+      "more": "Both metrics compare model output with human reference translations, from 0 to 100. Minority languages often have spelling variation and several writing conventions, which BLEU punishes heavily. Meta's NLLB evaluation reports chrF++ for this reason. Automatic scores still need human rating by native speakers, as Minh proposed."
     },
     {
-      "afterLine": 9,
-      "type": "action_item",
-      "title": "Priya: GDPR summary and DPA",
-      "body": "Priya will send Alex the correct GDPR fine summary and the draft DPA by Thursday.",
-      "trigger_quote": "I will send it by Thursday",
-      "confidence": 0.9,
-      "more": "Owner: Priya. Due: Thursday. Deliverables: corrected GDPR fine summary for the German prospect, and the draft Data Processing Agreement."
+      "afterLine": 8,
+      "type": "related_idea",
+      "title": "Free, prior and informed consent",
+      "body": "Language data projects with ethnic minority communities often follow FPIC: explain the purpose in the local language, get consent before collecting, let people withdraw, and agree on pay and credit up front.",
+      "trigger_quote": "we need consent forms and a fair way to pay them",
+      "confidence": 0.76,
+      "more": "Free, prior and informed consent is a principle from the UN Declaration on the Rights of Indigenous Peoples, widely used by NGOs and research projects working with minority communities. In practice: consent forms read aloud in the local language, a clear statement of how recordings and text will be used and published, a simple way to withdraw, and a payment rate agreed with the community rather than set by the project alone."
     },
     {
       "afterLine": 10,
-      "type": "question_to_ask",
-      "title": "What do design partners commit to?",
-      "body": "Ask what design partners give in return for the discount, for example a feedback cadence, a case study, or a commitment to convert to a paid plan at general availability.",
-      "trigger_quote": "run a design partner program in December",
-      "confidence": 0.78,
-      "more": "Design partner programs work best with clear mutual commitments: a fixed number of partners, regular feedback sessions, reference or case-study rights, and pre-agreed pricing at launch. Without these, discounts can turn into long-term revenue leakage."
+      "type": "fact_check",
+      "title": "$50,000 is about 1.3 billion dong",
+      "body": "On 4 Nov 2026, Vietcombank sold US dollars at about 25,900 dong (State Bank central rate 25,267), so $50,000 is roughly 1.3 billion dong, not 1 billion. Budget with the current rate.",
+      "trigger_quote": "With the dollar at about twenty thousand dong",
+      "confidence": 0.9,
+      "more": "At about 25,900 VND per USD (Vietcombank selling rate, 4 November 2026), $50,000 is roughly 1.29 billion VND; at the State Bank central rate of 25,267 it is about 1.26 billion. The rate of 20,000 dong per dollar is more than a decade old. Grant budgets in dollars should state the exchange rate used and leave a margin for movement during the grant period."
     },
     {
       "afterLine": 13,
-      "type": "decision",
-      "title": "Design partners in December, GA in Q1",
-      "body": "The team decided to run a design partner program in December and move general availability of the enterprise tier to the first quarter.",
-      "trigger_quote": "We go with a design partner program in December",
-      "confidence": 0.95,
-      "more": "Rationale discussed: SOC 2 Type 2 requires an observation window, and the latency fix plus load testing need more time. Sales accepted the plan on the condition that design partners get a discount and early access."
+      "type": "question_to_ask",
+      "title": "Is an open licence enough?",
+      "body": "Ask how communities keep a say after release. A licence like CC BY guarantees credit but allows any use; some projects add a community data agreement on how the corpus may be used.",
+      "trigger_quote": "release the corpus under an open license",
+      "confidence": 0.74,
+      "more": "Open licences such as CC BY 4.0 let anyone reuse the data, including commercially, as long as they give credit. That maximizes impact but removes control. Community-centred data projects sometimes pair an open release with a governance agreement, or keep sensitive material (such as sacred or personal stories) out of the public corpus."
     },
     {
       "afterLine": 14,
+      "type": "decision",
+      "title": "Grant first, compute credits in parallel",
+      "body": "The team will apply for the AI for good grant first, request cloud compute credits in parallel, and keep crowdfunding as a backup for next year.",
+      "trigger_quote": "We apply for the grant first",
+      "confidence": 0.95,
+      "more": "Rationale: the grant covers data collection and paying native speakers, the most important costs; compute credits cover model training. Crowdfunding is deferred to next year as a backup."
+    },
+    {
+      "afterLine": 15,
       "type": "action_item",
-      "title": "Daniel: latency plan by Tuesday",
-      "body": "Daniel owns the latency fix and will share a plan with p95 numbers by next Tuesday.",
-      "trigger_quote": "I will share a plan with the p95 numbers by next Tuesday",
+      "title": "Quang: grant proposal and budget",
+      "body": "Quang will draft the grant proposal and budget by next Friday.",
+      "trigger_quote": "I will draft the grant proposal and the budget by next Friday",
+      "confidence": 0.92,
+      "more": "Owner: Quang. Due: next Friday. Use the 2019 census figure (about 14 million people) for the impact case and today's exchange rate for the budget."
+    },
+    {
+      "afterLine": 16,
+      "type": "action_item",
+      "title": "Hoa: consent form and teachers",
+      "body": "Hoa will prepare the consent form and call the village teachers in Ha Giang this week.",
+      "trigger_quote": "I will prepare the consent form and call the teachers in Ha Giang this week",
+      "confidence": 0.92,
+      "more": "Owner: Hoa. Due: this week. Deliverables: a consent form (ideally available in the local languages) and confirmed volunteers among the Ha Giang teachers."
+    },
+    {
+      "afterLine": 17,
+      "type": "action_item",
+      "title": "Minh: baseline chrF for Tay",
+      "body": "Minh will share a baseline chrF score for Tay translation by the end of the month.",
+      "trigger_quote": "I will share a baseline chrF score for Tay by the end of the month",
       "confidence": 0.9,
-      "more": "Owner: Daniel. Due: next Tuesday. Target: bring search p95 from about 800 ms toward the 300 ms in the contract draft, likely starting with a re-ranker cache and a load test."
-    },
-    {
-      "afterLine": 16,
-      "type": "definition",
-      "title": "Net revenue retention (NRR)",
-      "body": "Revenue kept from existing customers over a period after upgrades, downgrades and churn. Above 100% means expansion outweighs losses; 108% is healthy for B2B SaaS.",
-      "trigger_quote": "Net revenue retention is about one hundred and eight percent",
-      "confidence": 0.87,
-      "more": "NRR = (starting recurring revenue + expansion − contraction − churn) ÷ starting recurring revenue. It can look healthy even while many small customers churn, because a few large accounts expanding hide the losses. Looking at logo churn by segment gives a clearer picture."
-    },
-    {
-      "afterLine": 16,
-      "type": "related_idea",
-      "title": "Usage-based tier for small teams",
-      "body": "Small teams churning after the trial may signal a price-to-value gap. A usage-based or lower entry tier could keep them, but test it with a cohort before changing list prices.",
-      "trigger_quote": "small teams churn right after the trial",
-      "confidence": 0.7,
-      "more": "Before redesigning pricing, check whether small teams churn because of price or because they never reached activation. Exit surveys and trial activation metrics can tell these apart; a usage-based tier only helps with the first."
+      "more": "Owner: Minh. Due: end of the month. Baseline before fine-tuning, so later improvements from NLLB fine-tuning and back-translation can be measured."
     }
   ],
   "summary": {
-    "summary": "The team reviewed readiness for the enterprise tier launch. Enterprise prospects require SOC 2 Type 2, which needs an observation window, and search latency (p95 about 800 ms) is far above the 300 ms contract target. A GDPR claim made to a German prospect was flagged as incorrect. The team agreed on a design partner program in December with general availability in Q1, and will discuss usage-based pricing for small teams next week.",
+    "summary": "The team discussed how to fund the next phase of Viettrans.info: machine translation for Vietnam's ethnic minority languages. A claim that minorities are about 2% of the population was flagged; the 2019 census puts them at about 14.7% (14 million people). Minh plans to fine-tune Meta's NLLB on about 20,000 Tay and Hmong sentence pairs, add back-translation, and measure quality with BLEU, chrF and native-speaker ratings. Village teachers in Ha Giang and Cao Bang will help, with consent forms and fair pay. The $50,000 grant estimate used an outdated exchange rate (about 1.3 billion dong at today's rate). The team chose to apply for the grant first and request compute credits in parallel.",
     "decisions": [
-      "Run a design partner program in December; move general availability of the enterprise tier to Q1.",
-      "No legal or compliance claims on sales calls without review."
+      "Apply for the AI for good grant first; request cloud compute credits in parallel; keep crowdfunding as a backup for next year.",
+      "Grant money goes to data collection and paying native speakers first.",
+      "Release the corpus under an open licence with credit to contributing villages."
     ],
     "action_items": [
-      { "task": "Send Alex a correct GDPR fine summary and the draft DPA", "owner": "Priya", "due": "Thursday" },
-      { "task": "Own the latency fix and share a plan with p95 numbers", "owner": "Daniel", "due": "Next Tuesday" },
-      { "task": "Add usage-based pricing for small teams to next week's agenda", "owner": "Maya", "due": "Next week" }
+      { "task": "Draft the grant proposal and budget", "owner": "Quang", "due": "Next Friday" },
+      { "task": "Prepare the consent form and call the teachers in Ha Giang", "owner": "Hoa", "due": "This week" },
+      { "task": "Share a baseline chrF score for Tay", "owner": "Minh", "due": "End of the month" }
     ]
   }
 }

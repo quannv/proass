@@ -12,21 +12,6 @@ export const TYPE_META: Record<SuggestionType, { icon: LucideIcon; badge: string
   related_idea: { icon: Lightbulb, badge: "bg-teal-100 text-teal-800 dark:bg-teal-500/15 dark:text-teal-300", bar: "bg-teal-500" },
 };
 
-const SPEAKER_COLORS = [
-  "text-sky-700 dark:text-sky-300",
-  "text-rose-700 dark:text-rose-300",
-  "text-emerald-700 dark:text-emerald-300",
-  "text-amber-700 dark:text-amber-300",
-  "text-violet-700 dark:text-violet-300",
-  "text-teal-700 dark:text-teal-300",
-];
-
-export function speakerColor(label: string): string {
-  let h = 0;
-  for (const c of label) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return SPEAKER_COLORS[h % SPEAKER_COLORS.length]!;
-}
-
 export function IconButton({
   label,
   onClick,

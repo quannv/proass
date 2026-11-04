@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import WebSocket from "ws";
 import { ClientMessageSchema, countWords, resolveTriggerConfig } from "@proass/shared";
-import type { ClientMessage, ServerMessage, SessionSettings, TriggerConfig } from "@proass/shared";
+import type { ClientMessage, ServerMessage, SessionSettings, TranscriptSegment, TriggerConfig } from "@proass/shared";
 import { config, providerInfo } from "./config";
 import { ContextManager } from "./context/ContextManager";
 import { llm } from "./llm";
@@ -112,7 +112,7 @@ export class Session {
       const raw = await llm.generateSuggestions(
         {
           summary: this.ctx.summary,
-          recent,
+          recent: this.named(recent),
           newSegmentIds,
           shown: this.ctx.shown,
           enabledTypes: this.settings.enabledTypes,
@@ -156,7 +156,7 @@ export class Session {
     const controller = new AbortController();
     this.summaryInflight = controller;
     try {
-      const summary = await llm.updateSummary(this.ctx.summary, segments, this.settings.outputLanguage, controller.signal);
+      const summary = await llm.updateSummary(this.ctx.summary, this.named(segments), this.settings.outputLanguage, controller.signal);
       if (this.closed) return;
       this.ctx.setSummary(summary, segments.length);
       this.send({ type: "summary_update", summary });
@@ -183,6 +183,13 @@ export class Session {
     await this.stt?.stop().catch(() => {});
     this.stt = null;
     log(this.id, "closed");
+  }
+
+  /** Swaps diarization labels for the names the user gave them, so the model can say "Lan will…". */
+  private named(segments: TranscriptSegment[]): TranscriptSegment[] {
+    const names = this.settings.speakerNames;
+    if (!names) return segments;
+    return segments.map((s) => (s.speaker && names[s.speaker] ? { ...s, speaker: names[s.speaker] } : s));
   }
 
   private triggerConfig(): TriggerConfig {

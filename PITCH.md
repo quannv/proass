@@ -9,13 +9,14 @@
 - When the meeting ends, the notes are already written.
 
 ## 3. Live demo (75 s)
-1. Press **Play demo** to start a scripted enterprise launch meeting with 4 speakers. Point out the live transcript and speaker labels from **Muse Voice Transcribe**.
-2. "SOC 2 Type 2" and "p95" come up, and definition cards slide in. The STT hears "page 95"; **Muse Wonder** still explains p95 correctly.
-3. A salesperson says GDPR fines max out at €1M. A **fact-check card** corrects it: €20M or 4% of global turnover.
-4. Click the card's quote to jump to that moment in the transcript. Click **Tell me more** for a deeper explanation.
-5. Decision and action-item cards appear ("Priya, GDPR summary by Thursday").
-6. Click **End & summarize** to get the summary, decisions and an owner/due checklist, then **Export .md**.
-7. _Optional, live:_ switch to the mic and say "Bitcoin is trading at about fifty thousand dollars today." The panel shows **Searching: …**, and 10–15 s later a fact-check card gives today's price. Talk through what's happening while it searches.
+1. Press **Play demo**: the Viettrans.info team plans how to fund machine translation for Vietnam's ethnic minority languages. Point out the live transcript from **Muse Voice Transcribe**: four speakers, each with an avatar, a name and a share-of-talk bar.
+2. Quang says minorities are "only about two percent" of the population. A **fact-check card** corrects it: about 14.7%, 14 million people (2019 census).
+3. "NLLB", "back translation", "BLEU and chrF" come up, and definition cards explain them.
+4. Quang converts a $50,000 grant at "twenty thousand dong". The panel shows **Searching: …**, and a fact-check card arrives with today's exchange rate: live web search.
+5. Click the card's quote to jump to that moment in the transcript. Click **Tell me more** for a deeper explanation.
+6. Decision and action-item cards appear ("Quang: grant proposal by next Friday").
+7. Click **End & summarize** to get the summary, decisions and an owner/due checklist, then **Export .md**.
+8. _Optional:_ click "Speaker A" in a real meeting to rename them; new insights and the notes use the name.
 
 _Backup:_ if the Wi-Fi is bad, toggle **Offline mode**. The same demo runs fully in the browser.
 

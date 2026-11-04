@@ -20,13 +20,23 @@ export interface DemoSuggestion {
   more: string;
 }
 
+export interface DemoSpeaker {
+  name: string;
+  role: string;
+}
+
 export const DEMO_TITLE: string = meeting.title;
+/** Demo participants in order of first appearance (used to name diarized speakers in the live demo). */
+export const DEMO_SPEAKERS: DemoSpeaker[] = [...new Set(meeting.lines.map((l) => l.speaker))].map((name) => ({
+  name,
+  role: (meeting.speakers as Record<string, { role: string }>)[name]!.role,
+}));
 export const DEMO_DURATION_MS: number = timeline.durationMs;
 export const DEMO_LINES: DemoLine[] = timeline.lines;
 export const DEMO_SUGGESTIONS = meeting.suggestions as DemoSuggestion[];
 export const DEMO_SUMMARY: MeetingSummary = meeting.summary;
 /** STT keyword hints for the demo meeting's jargon. */
-export const DEMO_KEYWORDS = ["SOC 2", "p95", "RAG", "re-ranker", "GDPR", "DPA", "NRR", "design partner"];
+export const DEMO_KEYWORDS = ["Viettrans.info", "Tay", "Hmong", "NLLB", "BLEU", "chrF", "back translation", "parallel corpus", "Ha Giang", "Cao Bang", "dong"];
 export const DEMO_AUDIO_URL = "/demo/meeting.m4a";
 
 export type ScriptEvent =

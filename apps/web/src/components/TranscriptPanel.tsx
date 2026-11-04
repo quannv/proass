@@ -1,17 +1,32 @@
 "use client";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, AudioLines, ChevronDown, Play } from "lucide-react";
 import { formatClock } from "@proass/shared";
+import type { TranscriptSegment } from "@proass/shared";
 import { startMeeting } from "@/lib/controller";
-import { speakerName } from "@/lib/export";
+import type { SpeakerInfo } from "@/lib/speakers";
 import { isRecording, useMeeting } from "@/store/meeting";
-import { Panel, speakerColor } from "./ui";
+import { Avatar, SpeakerName, SpeakersBar, useSpeakers } from "./speakers";
+import { Panel } from "./ui";
+
+/** Consecutive lines by the same speaker are shown as one turn under a single avatar. */
+function groupTurns(segments: TranscriptSegment[]): { speaker?: string; segments: TranscriptSegment[] }[] {
+  const turns: { speaker?: string; segments: TranscriptSegment[] }[] = [];
+  for (const seg of segments) {
+    const last = turns.at(-1);
+    if (last && last.speaker === seg.speaker) last.segments.push(seg);
+    else turns.push({ speaker: seg.speaker, segments: [seg] });
+  }
+  return turns;
+}
 
 export default function TranscriptPanel() {
   const segments = useMeeting((s) => s.segments);
   const partial = useMeeting((s) => s.partial);
   const highlight = useMeeting((s) => s.highlight);
   const status = useMeeting((s) => s.status);
+  const speakers = useSpeakers();
+  const turns = useMemo(() => groupTurns(segments), [segments]);
   const scroller = useRef<HTMLDivElement>(null);
   const [following, setFollowing] = useState(true);
 
@@ -41,6 +56,7 @@ export default function TranscriptPanel() {
         </>
       }
     >
+      <SpeakersBar />
       <RunningSummary />
       <div className="relative min-h-0 flex-1">
         <div ref={scroller} onScroll={onScroll} className="h-full overflow-y-auto px-4 py-3">
@@ -48,29 +64,33 @@ export default function TranscriptPanel() {
             <EmptyState recording={isRecording(status)} />
           ) : (
             <ol className="space-y-1">
-              {segments.map((s) => (
-                <li
-                  key={highlight?.segmentId === s.id ? `${s.id}-${highlight.at}` : s.id}
-                  id={`seg-${s.id}`}
-                  className={`grid grid-cols-[3.25rem_1fr] gap-2 rounded-lg px-2 py-1.5 ${highlight?.segmentId === s.id ? "animate-flash" : ""}`}
-                >
-                  <time className="pt-0.5 font-mono text-xs text-zinc-400 tabular-nums">{formatClock(s.startMs)}</time>
-                  <p className="text-[15px] leading-relaxed">
-                    {s.speaker && <span className={`mr-1.5 text-xs font-semibold ${speakerColor(s.speaker)}`}>{speakerName(s.speaker)}</span>}
-                    {s.text}
-                  </p>
-                </li>
-              ))}
-              {partial && (
-                <li className="grid grid-cols-[3.25rem_1fr] gap-2 px-2 py-1.5">
-                  <span className="pt-0.5 font-mono text-xs text-zinc-300 dark:text-zinc-600">live</span>
-                  <p className="text-[15px] leading-relaxed text-zinc-400 dark:text-zinc-500">
-                    {partial.speaker && <span className={`mr-1.5 text-xs font-semibold opacity-70 ${speakerColor(partial.speaker)}`}>{speakerName(partial.speaker)}</span>}
-                    {partial.text}
-                    <span className="ml-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-zinc-400" />
-                  </p>
-                </li>
-              )}
+              {turns.map((turn) => {
+                const who = turn.speaker ? speakers.get(turn.speaker) : undefined;
+                const first = turn.segments[0]!;
+                return (
+                  <li key={first.id} className="flex gap-3 px-1 py-1.5">
+                    {who ? <Avatar speaker={who} /> : <span className="w-8 shrink-0" />}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-baseline gap-x-2">
+                        {who && <SpeakerName speaker={who} />}
+                        {who?.role && <span className="text-xs text-zinc-400">{who.role}</span>}
+                        <time className="font-mono text-xs text-zinc-400 tabular-nums">{formatClock(first.startMs)}</time>
+                      </div>
+                      {turn.segments.map((s) => (
+                        <p
+                          key={highlight?.segmentId === s.id ? `${s.id}-${highlight.at}` : s.id}
+                          id={`seg-${s.id}`}
+                          title={formatClock(s.startMs)}
+                          className={`-mx-1.5 rounded-md px-1.5 py-0.5 text-[15px] leading-relaxed ${highlight?.segmentId === s.id ? "animate-flash" : ""}`}
+                        >
+                          {s.text}
+                        </p>
+                      ))}
+                    </div>
+                  </li>
+                );
+              })}
+              {partial && <PartialLine text={partial.text} speaker={partial.speaker ? speakers.get(partial.speaker) : undefined} />}
             </ol>
           )}
         </div>
@@ -84,6 +104,28 @@ export default function TranscriptPanel() {
         )}
       </div>
     </Panel>
+  );
+}
+
+/** The line being spoken right now. Live Muse partials carry no speaker yet; the demo script's do. */
+function PartialLine({ text, speaker }: { text: string; speaker?: SpeakerInfo }) {
+  return (
+    <li className="flex gap-3 px-1 py-1.5">
+      {speaker ? (
+        <Avatar speaker={speaker} faded />
+      ) : (
+        <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+          <AudioLines className="h-4 w-4 animate-pulse text-zinc-400" />
+        </span>
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-2 text-sm font-semibold text-zinc-400">{speaker?.name ?? "Speaking…"}</div>
+        <p className="text-[15px] leading-relaxed text-zinc-400 dark:text-zinc-500">
+          {text}
+          <span className="ml-0.5 inline-block h-4 w-0.5 translate-y-0.5 animate-pulse bg-zinc-400" />
+        </p>
+      </div>
+    </li>
   );
 }
 

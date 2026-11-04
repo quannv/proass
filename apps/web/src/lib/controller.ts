@@ -5,6 +5,7 @@ import { CaptureError, startCapture } from "@/audio/capture";
 import type { CaptureHandle } from "@/audio/capture";
 import { WS_URL, explain, getSession, summarize } from "@/lib/api";
 import { startOfflineDemo } from "@/lib/offline-demo";
+import { displayName, namesForServer, resolveSpeakers } from "@/lib/speakers";
 import { WsClient } from "@/lib/ws-client";
 import { elapsedMs, isRecording, useMeeting } from "@/store/meeting";
 
@@ -20,6 +21,11 @@ let runId = 0;
 
 const store = () => useMeeting.getState();
 
+function speakers() {
+  const s = store();
+  return resolveSpeakers(s.segments, s.speakerNames, s.settings.source === "demo");
+}
+
 function sessionSettings(): SessionSettings {
   const { frequency, enabledTypes, outputLanguage, spokenLanguages, keywords, source } = store().settings;
   return {
@@ -28,7 +34,22 @@ function sessionSettings(): SessionSettings {
     outputLanguage,
     spokenLanguages,
     keywords: source === "demo" ? [...new Set([...keywords, ...DEMO_KEYWORDS])] : keywords,
+    speakerNames: namesForServer(speakers()),
   };
+}
+
+let sentNames = "";
+/** Tells the server when a speaker gets (or changes) a name, so new insights use it. */
+function syncSpeakerNames(): void {
+  const names = JSON.stringify(namesForServer(speakers()));
+  if (names === sentNames) return;
+  sentNames = names;
+  pushSettings();
+}
+
+export function renameSpeaker(label: string, name: string): void {
+  store().renameSpeaker(label, name);
+  syncSpeakerNames();
 }
 
 export function showNotice(message: string): void {
@@ -141,6 +162,7 @@ function handleServerMessage(msg: ServerMessage): void {
       break;
     case "final":
       s.addFinal(msg.segment);
+      if (msg.segment.speaker) syncSpeakerNames();
       break;
     case "thinking":
       s.set({ thinking: msg.active, searching: null });
@@ -212,7 +234,10 @@ export async function generateSummary(): Promise<void> {
     const data = ranOffline
       ? await new Promise<typeof DEMO_SUMMARY>((r) => setTimeout(() => r(DEMO_SUMMARY), 1200))
       : await summarize({
-          segments: s.segments.map(({ text, speaker, startMs }) => ({ text, speaker, startMs })),
+          segments: (() => {
+            const names = speakers();
+            return s.segments.map(({ text, speaker, startMs }) => ({ text, speaker: speaker && displayName(speaker, names), startMs }));
+          })(),
           language: s.settings.outputLanguage,
         });
     store().set({ summary: { status: "done", data } });
@@ -232,9 +257,10 @@ export async function explainSuggestion(id: string): Promise<void> {
     if (ranOffline || s.providers === "offline") {
       text = cached?.more ?? "A deeper explanation isn't available in offline demo mode.";
     } else {
+      const names = speakers();
       const context = s.segments
         .slice(-40)
-        .map((x) => `[${formatClock(x.startMs)}]${x.speaker ? ` ${x.speaker}:` : ""} ${x.text}`)
+        .map((x) => `[${formatClock(x.startMs)}]${x.speaker ? ` ${displayName(x.speaker, names)}:` : ""} ${x.text}`)
         .join("\n");
       ({ text } = await explain({
         suggestion: { type: item.type, title: item.title, body: item.body, triggerQuote: item.triggerQuote },

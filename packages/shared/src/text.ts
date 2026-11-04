@@ -30,6 +30,11 @@ export function quoteCoverage(quote: string, text: string): number {
   return q.filter((w) => t.has(w)).length / q.length;
 }
 
+/** True for a diarization label ("A", "B", "1"), as opposed to a person's name. */
+export function isSpeakerLabel(speaker: string): boolean {
+  return /^[A-Z0-9]{1,2}$/.test(speaker);
+}
+
 /** Truncate to `max` words, adding an ellipsis when cut. */
 export function clampWords(text: string, max: number): string {
   const words = text.trim().split(/\s+/);
