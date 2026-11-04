@@ -28,7 +28,9 @@ _Backup:_ if the Wi-Fi is bad, toggle **Offline mode**. The same demo runs fully
 - Deployed on AWS: ECS Fargate behind an HTTPS load balancer (keys in Secrets Manager, per-IP rate and concurrency limits) and the web app on Amplify.
 
 ## 5. Roadmap (15 s)
+- Mobile app (iOS and Android) for in-person meetings: put your phone on the table and get insights there.
+- Better accuracy in noisy rooms: noise suppression before transcription, and fine-tuning on noisy, accented and code-switched meeting audio.
 - Desktop app to capture system audio from any meeting app; Zoom/Meet bots.
 - Personal knowledge base (RAG over your docs, CRM, wiki), so insights include *your* context.
-- Multilingual meetings with live translation of insights (Muse already handles 25 languages and code-switching).
+- Multilingual meetings with live translation of insights, including Vietnamese-English code-switching as transcription support improves.
 - Push action items to Jira, Linear or Asana, and follow-ups to email.

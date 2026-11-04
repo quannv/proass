@@ -150,6 +150,15 @@ On Railway or Fly.io, use the Dockerfile, or set the build command to `npm ci &&
 4. Click an insight's quote to jump to the transcript, and use **Tell me more**.
 5. Click **End & summarize**, then **Export .md**.
 
+## Roadmap
+
+- **Mobile app** (iOS and Android) for in-person meetings: put your phone on the table and get insights there.
+- **Better accuracy in noisy rooms**: noise suppression before transcription, and fine-tuning on noisy, accented and code-switched meeting audio.
+- **Desktop app** to capture system audio from any meeting app; Zoom/Meet bots.
+- **Personal knowledge base** (RAG over your docs, CRM, wiki), so insights include your own context.
+- **Multilingual meetings** with live translation of insights.
+- **Integrations**: push action items to Jira, Linear or Asana, and follow-ups to email.
+
 ## Known limitations
 
 - Speaker labels come from Muse diarization (`A`, `B`, …). They restart from `A` after a reconnect because a new STT session begins.
