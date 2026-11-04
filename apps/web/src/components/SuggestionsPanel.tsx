@@ -40,7 +40,7 @@ export default function SuggestionsPanel() {
         ))
       }
     >
-      <div className="min-h-0 flex-1 overflow-y-auto p-3">
+      <div className="min-h-0 flex-1 overflow-y-auto p-3" aria-live="polite" aria-relevant="additions">
         {visible.length === 0 ? (
           <div className="mx-auto mt-10 max-w-xs text-center text-sm text-zinc-500 dark:text-zinc-400">
             <Sparkles className="mx-auto mb-3 h-6 w-6 text-zinc-300 dark:text-zinc-600" />

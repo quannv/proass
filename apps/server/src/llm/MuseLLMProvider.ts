@@ -67,9 +67,9 @@ export class MuseLLMProvider implements LLMProvider {
       { role: "user", content: P.buildSuggestionPrompt(ctx) },
     ];
     let searchesLeft = this.opts.maxSearches;
-    for (;;) {
-      // Once the budget is spent, the tool is dropped so the model has to answer.
-      const offerTool = searchesLeft > 0;
+    for (let round = 0; ; round++) {
+      // Once the budget is spent (or malformed calls keep coming), the tool is dropped so the model has to answer.
+      const offerTool = searchesLeft > 0 && round <= this.opts.maxSearches;
       const choice = await this.complete(
         {
           messages,
@@ -208,7 +208,10 @@ export class MuseLLMProvider implements LLMProvider {
       const retryable = res.status === 429 || res.status >= 500;
       const detail = (await res.text().catch(() => "")).slice(0, 300);
       if (!retryable || attempt >= 1 || signal.aborted) throw new Error(`LLM request failed (${res.status}): ${detail}`);
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise<void>((resolve, reject) => {
+        const t = setTimeout(resolve, 800);
+        signal.addEventListener("abort", () => (clearTimeout(t), reject(signal.reason)), { once: true });
+      });
     }
   }
 }

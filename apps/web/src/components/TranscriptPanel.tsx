@@ -43,7 +43,7 @@ export default function TranscriptPanel() {
     >
       <RunningSummary />
       <div className="relative min-h-0 flex-1">
-        <div ref={scroller} onScroll={onScroll} className="h-full overflow-y-auto px-4 py-3" aria-live="polite">
+        <div ref={scroller} onScroll={onScroll} className="h-full overflow-y-auto px-4 py-3">
           {segments.length === 0 && !partial ? (
             <EmptyState recording={isRecording(status)} />
           ) : (

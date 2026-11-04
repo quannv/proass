@@ -102,8 +102,8 @@ export class Session {
 
   private async suggest(signal: AbortSignal): Promise<void> {
     const cfg = this.triggerConfig();
-    const newSegmentIds = this.ctx.takeNewIds();
-    if (newSegmentIds.size === 0) return;
+    const newSegmentIds = this.ctx.newIds();
+    if (newSegmentIds.size === 0 || this.settings.enabledTypes.length === 0) return;
     const recent = this.ctx.recent(cfg.windowMs);
     const started = Date.now();
     let searches = 0;
@@ -126,6 +126,8 @@ export class Session {
         signal,
       );
       if (signal.aborted || this.closed) return;
+      // Only now: a failed call leaves these lines marked new (">>") for the next one.
+      this.ctx.markSeen(newSegmentIds);
       const items = postProcess(raw, {
         recent,
         shown: this.ctx.shown,

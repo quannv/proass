@@ -15,6 +15,8 @@ let capture: CaptureHandle | null = null;
 let offline: { stop(): void } | null = null;
 let noticeTimer: ReturnType<typeof setTimeout> | undefined;
 let ranOffline = false;
+/** Bumped by every Start and Stop, so a Start still awaiting permission knows it was cancelled. */
+let runId = 0;
 
 const store = () => useMeeting.getState();
 
@@ -42,32 +44,45 @@ export async function startMeeting(): Promise<void> {
   // The demo always starts from the top; otherwise Start resumes the current meeting.
   if (settings.source === "demo" || s.view === "summary") s.resetMeeting();
   s.set({ status: "connecting", error: null, notice: null, thinking: false, view: "meeting" });
+  const run = ++runId;
 
+  let handle: CaptureHandle;
   try {
-    capture = await startCapture({
+    handle = await startCapture({
       source: settings.source,
       deviceId: settings.deviceId || undefined,
       demoUrl: DEMO_AUDIO_URL,
       onChunk: (pcm) => ws?.sendAudio(pcm),
       onLevel: (rms) => store().set({ level: Math.min(1, rms * 4) }),
       onEnded: (reason) => {
-        if (reason === "demo_ended") setTimeout(() => void stopMeeting(), 2500);
+        if (run !== runId) return;
+        if (reason === "demo_ended") setTimeout(() => run === runId && void stopMeeting(), 2500);
         else {
           showNotice(reason === "tab_ended" ? "Tab sharing stopped." : "Microphone disconnected.");
           void stopMeeting();
         }
       },
+      onDeviceFallback: () => {
+        store().setSettings({ deviceId: "" });
+        showNotice("The selected microphone isn't available; using the default one.");
+      },
     });
   } catch (err) {
-    store().set({ status: "error", error: err instanceof CaptureError ? err.message : String(err) });
+    if (run === runId) store().set({ status: "error", error: err instanceof CaptureError ? err.message : String(err) });
     return;
   }
+  // Stop was pressed while the permission prompt or tab picker was open.
+  if (run !== runId) {
+    handle.stop();
+    return;
+  }
+  capture = handle;
 
   store().set({ runStartedAt: Date.now() });
   ranOffline = settings.source === "demo" && settings.offlineDemo;
   if (ranOffline) {
     store().set({ status: "listening", providers: "offline" });
-    offline = startOfflineDemo(capture.audio, settings.enabledTypes, {
+    offline = startOfflineDemo(handle.audio, settings.enabledTypes, {
       onEvent: (e) => (e.type === "partial" ? store().set({ partial: { text: e.text, speaker: e.speaker } }) : store().addFinal(e.segment)),
       onThinking: (active) => store().set({ thinking: active }),
       onSuggestions: (items) => store().addSuggestions(items),
@@ -107,8 +122,8 @@ export async function startMeeting(): Promise<void> {
     onFatal: (message) => {
       store().promotePartial();
       teardownCapture();
+      finishRun(); // reads ws.audioMs, so the next run resumes at the right offset
       ws = null;
-      finishRun();
       store().set({ status: "error", error: message });
     },
   });
@@ -164,6 +179,7 @@ function finishRun(): void {
 export async function stopMeeting(): Promise<void> {
   const s = store();
   if (!isRecording(s.status)) return;
+  runId++;
   s.set({ status: "stopping" });
   teardownCapture();
   offline?.stop();

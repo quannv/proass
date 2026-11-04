@@ -153,8 +153,7 @@ export class MuseSTTProvider implements STTProvider {
       const why = lastError || reason.toString() || `code ${code}`;
       if (!sock.ready && !this.everReady && this.attempts >= 1) {
         // Failing before the first ack twice in a row is almost certainly config/auth; don't loop.
-        const err = new Error(`Speech service rejected the connection: ${why}`);
-        onFail ? onFail(err) : this.handlers?.onError(err, true);
+        this.fail(new Error(`Speech service rejected the connection: ${why}`), onFail);
         return;
       }
       this.scheduleReconnect(code, why, onReady, onFail);
@@ -164,8 +163,7 @@ export class MuseSTTProvider implements STTProvider {
   private scheduleReconnect(code: number, why: string, onReady?: () => void, onFail?: (err: Error) => void): void {
     this.attempts++;
     if (this.attempts > MAX_ATTEMPTS) {
-      const err = new Error(`Speech service unavailable: ${why}`);
-      onFail ? onFail(err) : this.handlers?.onError(err, true);
+      this.fail(new Error(`Speech service unavailable: ${why}`), onFail);
       return;
     }
     // Re-send everything since the last final so the interrupted utterance is transcribed again.
@@ -177,10 +175,20 @@ export class MuseSTTProvider implements STTProvider {
     this.retryTimer = setTimeout(() => this.connect(offsetMs, onReady, onFail), delay);
   }
 
+  /**
+   * Gives up for good. `onFail` rejects start() and only applies until the first handshake;
+   * after that start() has resolved, so the session must hear about it via onError(fatal).
+   */
+  private fail(err: Error, onFail?: (err: Error) => void): void {
+    if (onFail && !this.everReady) onFail(err);
+    else this.handlers?.onError(err, true);
+  }
+
   /** Planned switch to a new Muse session before the 60-minute cap. */
   private rotate(): void {
     const old = this.sock;
-    if (!old || this.stopped) return;
+    // Mid-reconnect: the new socket sets a fresh rotate timer once it is ready.
+    if (!old || this.stopped || !old.ready || old.ws.readyState !== WebSocket.OPEN) return;
     old.ws.send(JSON.stringify({ type: "endStream" })); // old socket finalizes its last turn
     setTimeout(() => old.ws.terminate(), 5000);
     this.sinceFinal = [];

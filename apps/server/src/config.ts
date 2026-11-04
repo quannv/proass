@@ -38,7 +38,15 @@ export const config = {
   // A random secret means tokens die on restart; set SESSION_SECRET for multi-instance deploys.
   sessionSecret: env.SESSION_SECRET || randomBytes(32).toString("hex"),
   tokenTtlMs: 60 * 60 * 1000,
+  /** Behind a load balancer that appends the client address to X-Forwarded-For (AWS ALB, Render). */
+  trustProxy: env.TRUST_PROXY === "1" || env.TRUST_PROXY === "true",
   maxSessionsPerIpPerHour: Number(env.MAX_SESSIONS_PER_IP_PER_HOUR || 60),
+  /** Open meeting sockets allowed at once, per client IP (a shared venue Wi-Fi is one IP) and in total. */
+  maxConcurrentPerIp: Number(env.MAX_CONCURRENT_PER_IP || 5),
+  maxConcurrent: Number(env.MAX_CONCURRENT || 25),
+  /** "Tell me more" and end-of-meeting summary calls per client IP per hour. */
+  maxExplainPerIpPerHour: Number(env.MAX_EXPLAIN_PER_IP_PER_HOUR || 120),
+  maxSummaryPerIpPerHour: Number(env.MAX_SUMMARY_PER_IP_PER_HOUR || 20),
 
   museApiKey,
   museBaseUrl: env.MUSE_BASE_URL || "https://api.meta.ai/v1",

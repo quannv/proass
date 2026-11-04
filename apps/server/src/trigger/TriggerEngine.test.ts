@@ -10,12 +10,13 @@ function setup() {
   mock.timers.enable({ apis: ["setTimeout", "Date"], now: 0 });
   const calls: number[] = [];
   const signals: AbortSignal[] = [];
+  const finish: (() => void)[] = [];
   const engine = new TriggerEngine(() => cfg, async (signal) => {
     calls.push(Date.now());
     signals.push(signal);
-    await new Promise(() => {}); // never resolves: lets us observe aborts
+    await new Promise<void>((r) => finish.push(r)); // resolved by the test
   });
-  return { engine, calls, signals };
+  return { engine, calls, signals, finish };
 }
 
 test("fires after enough words, debounced", async (t) => {
@@ -45,11 +46,13 @@ test("fires on a natural pause, postponed while partials arrive", async (t) => {
   engine.dispose();
 });
 
-test("respects min interval and aborts stale in-flight calls", async (t) => {
+test("respects min interval between calls", async (t) => {
   t.after(() => mock.timers.reset());
-  const { engine, calls, signals } = setup();
+  const { engine, calls, finish } = setup();
   engine.onFinal(25);
   mock.timers.tick(500);
+  await flush();
+  finish[0]!();
   await flush();
   engine.onFinal(25);
   mock.timers.tick(5000);
@@ -59,9 +62,32 @@ test("respects min interval and aborts stale in-flight calls", async (t) => {
   await flush();
   assert.equal(calls.length, 2);
   assert.equal(calls[1]! - calls[0]!, 9000);
-  assert.equal(signals[0]!.aborted, true);
   engine.dispose();
-  assert.equal(signals[1]!.aborted, true);
+});
+
+test("a slow call is never aborted by newer speech; the next call waits for it", async (t) => {
+  t.after(() => mock.timers.reset());
+  const { engine, calls, signals, finish } = setup();
+  engine.onFinal(25);
+  mock.timers.tick(500);
+  await flush();
+  assert.equal(calls.length, 1);
+  // Continuous speech while the call (e.g. one with a web search) takes 14 s.
+  for (let i = 0; i < 14; i++) {
+    engine.onFinal(10);
+    mock.timers.tick(1000);
+    await flush();
+  }
+  assert.equal(calls.length, 1, "no overlapping call");
+  assert.equal(signals[0]!.aborted, false, "in-flight call kept");
+  finish[0]!();
+  await flush();
+  await flush();
+  mock.timers.tick(0);
+  await flush();
+  assert.equal(calls.length, 2, "queued words fire right after the slow call");
+  engine.dispose();
+  assert.equal(signals[1]!.aborted, true, "dispose aborts the in-flight call");
 });
 
 test("ignores too few words", async (t) => {

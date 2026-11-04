@@ -32,13 +32,18 @@ export function isOriginAllowed(origin: string | undefined): boolean {
   return !!origin && config.allowedOrigins.includes(origin);
 }
 
-/** Tiny in-memory per-IP limiter for token issuance. */
-const issued = new Map<string, number[]>();
-export function allowTokenFor(ip: string): boolean {
+/** Tiny in-memory sliding-window limiter, keyed by e.g. `session:<ip>`. */
+const hits = new Map<string, number[]>();
+export function allowRate(key: string, perHour: number): boolean {
   const hourAgo = Date.now() - 3_600_000;
-  const recent = (issued.get(ip) ?? []).filter((t) => t > hourAgo);
-  if (recent.length >= config.maxSessionsPerIpPerHour) return false;
+  const recent = (hits.get(key) ?? []).filter((t) => t > hourAgo);
+  if (recent.length >= perHour) return false;
   recent.push(Date.now());
-  issued.set(ip, recent);
+  hits.set(key, recent);
   return true;
 }
+// Forget idle keys so the map can't grow without bound.
+setInterval(() => {
+  const hourAgo = Date.now() - 3_600_000;
+  for (const [key, times] of hits) if (!times.some((t) => t > hourAgo)) hits.delete(key);
+}, 10 * 60_000).unref();

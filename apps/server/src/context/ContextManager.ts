@@ -30,23 +30,24 @@ export class ContextManager {
     }
   }
 
-  /** Segments within `windowMs` of the latest one. */
+  /**
+   * Segments within `windowMs` of the latest one, plus anything the running summary doesn't cover yet
+   * (so nothing falls into the gap between the window and the summary), capped at 2× the window.
+   */
   recent(windowMs: number): TranscriptSegment[] {
     const last = this.segments.at(-1);
     if (!last) return [];
-    return this.segments.filter((s) => s.endMs >= last.endMs - windowMs);
+    const from = Math.min(last.endMs - windowMs, Math.max(last.endMs - 2 * windowMs, this.segments[this.summarizedUpTo]?.startMs ?? Infinity));
+    return this.segments.filter((s) => s.endMs >= from);
   }
 
-  /** Marks the current recent window as seen and returns the ids that were new. */
-  takeNewIds(): Set<string> {
-    const ids = new Set<string>();
-    for (const s of this.segments) {
-      if (!this.seenByLlm.has(s.id)) {
-        ids.add(s.id);
-        this.seenByLlm.add(s.id);
-      }
-    }
-    return ids;
+  /** Ids not yet sent to the LLM. Call `markSeen` once a call using them succeeds. */
+  newIds(): Set<string> {
+    return new Set(this.segments.filter((s) => !this.seenByLlm.has(s.id)).map((s) => s.id));
+  }
+
+  markSeen(ids: Iterable<string>): void {
+    for (const id of ids) this.seenByLlm.add(id);
   }
 
   unsummarized(): TranscriptSegment[] {

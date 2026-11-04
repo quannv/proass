@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Mic, Monitor, MonitorSpeaker, Play, RotateCw, X } from "lucide-react";
-import { FREQUENCIES, OUTPUT_LANGUAGES, SUGGESTION_TYPES, SUGGESTION_TYPE_LABELS } from "@proass/shared";
+import { FREQUENCIES, OUTPUT_LANGUAGES, STT_LANGUAGES, SUGGESTION_TYPES, SUGGESTION_TYPE_LABELS } from "@proass/shared";
 import { listMicrophones } from "@/audio/capture";
 import type { AudioSource } from "@/audio/capture";
 import { newMeeting } from "@/lib/controller";
@@ -37,7 +37,7 @@ export default function SettingsDrawer({ open, onClose }: { open: boolean; onClo
     setSettings({ keywords: [...new Set(keywords.split(",").map((k) => k.trim()).filter(Boolean))].slice(0, 100) });
 
   return (
-    <div className={`fixed inset-0 z-50 ${open ? "" : "pointer-events-none"}`} aria-hidden={!open}>
+    <div className={`fixed inset-0 z-50 ${open ? "" : "pointer-events-none"}`} aria-hidden={!open} inert={!open}>
       <div onClick={onClose} className={`absolute inset-0 bg-zinc-950/30 backdrop-blur-[2px] transition-opacity ${open ? "opacity-100" : "opacity-0"}`} />
       <aside
         role="dialog"
@@ -103,6 +103,22 @@ export default function SettingsDrawer({ open, onClose }: { open: boolean; onClo
                 </span>
               </label>
             )}
+          </Section>
+
+          <Section title="Spoken language" note="Helps transcription; applies the next time you press Start.">
+            <select
+              value={settings.spokenLanguages[0] ?? ""}
+              onChange={(e) => setSettings({ spokenLanguages: e.target.value ? [e.target.value as (typeof STT_LANGUAGES)[number]] : [] })}
+              className="h-9 w-full rounded-lg border border-zinc-200 bg-transparent px-2 dark:border-zinc-700 dark:bg-zinc-900"
+              aria-label="Spoken language"
+            >
+              <option value="">Auto-detect language</option>
+              {STT_LANGUAGES.map((l) => (
+                <option key={l} value={l}>
+                  {l}
+                </option>
+              ))}
+            </select>
           </Section>
 
           <Section title="Suggestion frequency">

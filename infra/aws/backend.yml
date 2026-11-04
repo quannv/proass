@@ -80,6 +80,7 @@ Resources:
             - { Name: ALLOWED_ORIGINS, Value: !Ref AllowedOrigins }
             - { Name: MUSE_LLM_MODEL, Value: !Ref LlmModel }
             - { Name: MUSE_STT_MODE, Value: DIARIZATION }
+            - { Name: TRUST_PROXY, Value: "1" }   # behind the ALB, which appends the client IP to X-Forwarded-For
           Secrets:
             - { Name: MUSE_API_KEY, ValueFrom: !Sub "${SecretArn}:MUSE_API_KEY::" }
             - { Name: SESSION_SECRET, ValueFrom: !Sub "${SecretArn}:SESSION_SECRET::" }

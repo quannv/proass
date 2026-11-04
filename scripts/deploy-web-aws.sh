@@ -11,15 +11,33 @@ APP_NAME=proass-web
 BRANCH=main
 
 SERVER_URL="${NEXT_PUBLIC_SERVER_URL:-$(aws cloudformation describe-stacks --stack-name proass-server \
-  --query "Stacks[0].Outputs[?OutputKey=='ServerUrl'].OutputValue" --output text)}"
+  --query "Stacks[0].Outputs[?OutputKey=='ServerUrl'].OutputValue" --output text 2>/dev/null || true)}"
 [[ "$SERVER_URL" == https://* ]] || { echo "No backend URL found; deploy the backend first (DOMAIN=... scripts/deploy-aws.sh)" >&2; exit 1; }
 
 echo "==> Amplify app $APP_NAME"
+# Static hosts can't run Next's headers(), so Amplify sets them. Only our own page may use the mic and tab
+# capture, and no other site may frame it (clickjacking a page that records audio).
+HEADERS="customHeaders:
+  - pattern: '**'
+    headers:
+      - key: Permissions-Policy
+        value: microphone=(self), display-capture=(self)
+      - key: Strict-Transport-Security
+        value: max-age=31536000; includeSubDomains
+      - key: X-Frame-Options
+        value: DENY
+      - key: Content-Security-Policy
+        value: frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+      - key: X-Content-Type-Options
+        value: nosniff
+      - key: Referrer-Policy
+        value: strict-origin-when-cross-origin
+"
 APP_ID=$(aws amplify list-apps --query "apps[?name=='$APP_NAME'].appId | [0]" --output text)
 if [[ -z "$APP_ID" || "$APP_ID" == "None" ]]; then
-  # Static hosts can't run Next's headers(); only our own page may use the mic and tab capture.
-  HEADERS=$'customHeaders:\n  - pattern: \'**\'\n    headers:\n      - key: Permissions-Policy\n        value: microphone=(self), display-capture=(self)\n'
   APP_ID=$(aws amplify create-app --name $APP_NAME --platform WEB --custom-headers "$HEADERS" --query app.appId --output text)
+else
+  aws amplify update-app --app-id "$APP_ID" --custom-headers "$HEADERS" >/dev/null # keep headers in sync on every deploy
 fi
 aws amplify get-branch --app-id "$APP_ID" --branch-name $BRANCH >/dev/null 2>&1 ||
   aws amplify create-branch --app-id "$APP_ID" --branch-name $BRANCH --stage PRODUCTION >/dev/null

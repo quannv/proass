@@ -13,7 +13,9 @@ REPO=proass-server
 SECRET=proass/server
 ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 REGISTRY="$ACCOUNT.dkr.ecr.$AWS_REGION.amazonaws.com"
-TAG=$(git rev-parse --short HEAD)$(git diff --quiet HEAD -- apps/server packages/shared || echo "-dirty-$(date +%s)")
+# Uncommitted or untracked changes that end up in the image get a unique tag, so the deploy is never a silent no-op.
+TAG=$(git rev-parse --short HEAD)
+[[ -z $(git status --porcelain -- apps/server packages/shared package.json package-lock.json) ]] || TAG="$TAG-dirty-$(date +%s)"
 
 deployed_param() {
   local v
@@ -25,7 +27,7 @@ ALLOWED_ORIGINS="${ALLOWED_ORIGINS:-$(deployed_param AllowedOrigins)}"
 ALLOWED_ORIGINS="${ALLOWED_ORIGINS:-http://localhost:3000}"
 DOMAIN="${DOMAIN:-$(deployed_param DomainName)}"
 # Same model as local dev unless overridden.
-LLM_MODEL="${MUSE_LLM_MODEL:-$(grep -E '^MUSE_LLM_MODEL=' apps/server/.env | head -1 | cut -d= -f2-)}"
+LLM_MODEL="${MUSE_LLM_MODEL:-$(grep -sE '^MUSE_LLM_MODEL=' apps/server/.env | head -1 | cut -d= -f2- || true)}"
 LLM_MODEL="${LLM_MODEL:-muse-wonder-1.0}"
 [[ -n "$DOMAIN" ]] || { echo "Set DOMAIN=api.yourdomain.com (backend hostname)" >&2; exit 1; }
 
@@ -51,7 +53,7 @@ aws ecr describe-repositories --repository-names $REPO >/dev/null 2>&1 ||
   aws ecr create-repository --repository-name $REPO --image-scanning-configuration scanOnPush=true >/dev/null
 
 echo "==> Secret $SECRET"
-MUSE_API_KEY=$(grep -E '^MUSE_API_KEY=' apps/server/.env | head -1 | cut -d= -f2-)
+MUSE_API_KEY=$(grep -sE '^MUSE_API_KEY=' apps/server/.env | head -1 | cut -d= -f2- || true)
 [[ -n "$MUSE_API_KEY" ]] || { echo "MUSE_API_KEY missing in apps/server/.env" >&2; exit 1; }
 if SECRET_ARN=$(aws secretsmanager describe-secret --secret-id $SECRET --query ARN --output text 2>/dev/null); then
   # Keep the existing SESSION_SECRET so issued tokens stay valid; refresh the Muse key.
@@ -59,17 +61,19 @@ if SECRET_ARN=$(aws secretsmanager describe-secret --secret-id $SECRET --query A
     node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(0,"utf8")).SESSION_SECRET)')
   SECRET_JSON=$(MUSE_API_KEY="$MUSE_API_KEY" SESSION_SECRET="$SESSION_SECRET" node -e \
     'process.stdout.write(JSON.stringify({MUSE_API_KEY:process.env.MUSE_API_KEY,SESSION_SECRET:process.env.SESSION_SECRET}))')
-  aws secretsmanager put-secret-value --secret-id $SECRET --secret-string "$SECRET_JSON" >/dev/null
+  # Passed on stdin so the key never shows up in the process list.
+  aws secretsmanager put-secret-value --secret-id $SECRET --secret-string file:///dev/stdin <<<"$SECRET_JSON" >/dev/null
 else
   SECRET_JSON=$(MUSE_API_KEY="$MUSE_API_KEY" node -e \
     'process.stdout.write(JSON.stringify({MUSE_API_KEY:process.env.MUSE_API_KEY,SESSION_SECRET:require("crypto").randomBytes(32).toString("hex")}))')
-  SECRET_ARN=$(aws secretsmanager create-secret --name $SECRET --secret-string "$SECRET_JSON" --query ARN --output text)
+  SECRET_ARN=$(aws secretsmanager create-secret --name $SECRET --secret-string file:///dev/stdin --query ARN --output text <<<"$SECRET_JSON")
 fi
 unset MUSE_API_KEY SESSION_SECRET SECRET_JSON
 
 echo "==> Image $REGISTRY/$REPO:$TAG (linux/arm64)"
 aws ecr get-login-password | docker login --username AWS --password-stdin "$REGISTRY" >/dev/null
-docker buildx build --platform linux/arm64 -f apps/server/Dockerfile -t "$REGISTRY/$REPO:$TAG" --push .
+# No provenance attestation: it turns the tag into a manifest list, which hides ECR's scan results.
+docker buildx build --platform linux/arm64 --provenance=false -f apps/server/Dockerfile -t "$REGISTRY/$REPO:$TAG" --push .
 
 echo "==> Network"
 VPC_ID=$(aws ec2 describe-vpcs --filters Name=is-default,Values=true --query 'Vpcs[0].VpcId' --output text)

@@ -5,7 +5,7 @@
 - Searching or asking a chatbot mid-meeting means you stop listening, and you have to know what to ask.
 
 ## 2. Solution (20 s)
-- **ProActive Assistant** listens with you and speaks up **only when it's worth it**: it explains jargon, flags claims that look wrong, suggests a sharp question, and captures decisions and action items as they happen.
+- **ProActive Assistant** listens with you and speaks up **only when it's worth it**: it explains jargon, flags claims that look wrong (checking live prices and news on the web when it matters), suggests a sharp question, and captures decisions and action items as they happen.
 - When the meeting ends, the notes are already written.
 
 ## 3. Live demo (75 s)
@@ -15,14 +15,16 @@
 4. Click the card's quote to jump to that moment in the transcript. Click **Tell me more** for a deeper explanation.
 5. Decision and action-item cards appear ("Priya, GDPR summary by Thursday").
 6. Click **End & summarize** to get the summary, decisions and an owner/due checklist, then **Export .md**.
+7. _Optional, live:_ switch to the mic and say "Bitcoin is trading at about fifty thousand dollars today." The panel shows **Searching: …**, and 10–15 s later a fact-check card gives today's price. Talk through what's happening while it searches.
 
 _Backup:_ if the Wi-Fi is bad, toggle **Offline mode**. The same demo runs fully in the browser.
 
 ## 4. Technical highlights (30 s)
 - Browser AudioWorklet resamples to 24 kHz PCM16 and streams it over one WebSocket to a Node server that holds the keys.
 - Muse Voice Transcribe realtime: diarization, keyword biasing for jargon, auto-reconnect with audio replay, rotation before the 60-minute session cap.
-- Muse Wonder with **strict JSON-schema structured output**. A trigger engine (word count, natural pause, min interval, stale-request abort) plus Zod validation, confidence filtering, de-duplication and quote anchoring keep the panel calm.
+- Muse Wonder with **strict JSON-schema structured output** plus a `web_search` function tool, answered by Muse's built-in search on the Responses API. It only searches for facts that change over time, so normal cards stay at ~3–7 s. A trigger engine (word count, natural pause, min interval, one call at a time) plus Zod validation, confidence filtering, de-duplication and quote anchoring keep the panel calm.
 - Adapter pattern with mock providers: the whole app runs end-to-end without keys. No server-side storage.
+- Deployed on AWS: ECS Fargate behind an HTTPS load balancer (keys in Secrets Manager, per-IP rate and concurrency limits) and the web app on Amplify.
 
 ## 5. Roadmap (15 s)
 - Desktop app to capture system audio from any meeting app; Zoom/Meet bots.

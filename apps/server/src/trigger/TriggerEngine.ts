@@ -5,7 +5,9 @@ import type { TriggerConfig } from "@proass/shared";
  *  - after `minWords` new final words (debounced), or
  *  - after `pauseMs` of silence if at least `minWordsOnPause` new words exist,
  *  - never more often than `minIntervalMs`,
- *  - a newer call aborts a stale in-flight one.
+ *  - never two calls at once: words that arrive during a call wait for it to finish
+ *    (aborting it instead would starve long stretches of speech when calls outlast the interval).
+ *  - dispose() aborts the in-flight call.
  */
 export class TriggerEngine {
   private pendingWords = 0;
@@ -13,6 +15,8 @@ export class TriggerEngine {
   private fireTimer?: NodeJS.Timeout;
   private pauseTimer?: NodeJS.Timeout;
   private inflight: AbortController | null = null;
+  /** A trigger fired while a call was in flight; run again once it settles. */
+  private rerun = false;
   private disposed = false;
 
   constructor(
@@ -59,8 +63,11 @@ export class TriggerEngine {
 
   private async run(): Promise<void> {
     if (this.disposed || this.pendingWords === 0) return;
+    if (this.inflight) {
+      this.rerun = true;
+      return;
+    }
     clearTimeout(this.pauseTimer);
-    this.inflight?.abort();
     const controller = new AbortController();
     this.inflight = controller;
     this.pendingWords = 0;
@@ -68,7 +75,11 @@ export class TriggerEngine {
     try {
       await this.fire(controller.signal);
     } finally {
-      if (this.inflight === controller) this.inflight = null;
+      this.inflight = null;
+      if (this.rerun && !this.disposed) {
+        this.rerun = false;
+        this.schedule(0);
+      }
     }
   }
 }

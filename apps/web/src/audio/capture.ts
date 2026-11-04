@@ -8,6 +8,8 @@ export interface CaptureOptions {
   onLevel: (rms: number) => void;
   /** The source went away (tab sharing stopped, demo finished, mic unplugged). */
   onEnded: (reason: "tab_ended" | "demo_ended" | "mic_ended") => void;
+  /** The chosen mic is no longer available; the default mic is used instead. */
+  onDeviceFallback?: () => void;
 }
 
 export interface CaptureHandle {
@@ -67,15 +69,23 @@ export async function startCapture(opts: CaptureOptions): Promise<CaptureHandle>
     }
     if (opts.source === "mic" || opts.source === "mic+tab") {
       if (!navigator.mediaDevices?.getUserMedia) throw new CaptureError("Microphone access needs HTTPS (or localhost).");
-      const mic = await navigator.mediaDevices
-        .getUserMedia({
+      const getMic = (deviceId?: string) =>
+        navigator.mediaDevices.getUserMedia({
           audio: {
-            deviceId: opts.deviceId ? { exact: opts.deviceId } : undefined,
+            deviceId: deviceId ? { exact: deviceId } : undefined,
             echoCancellation: true,
             noiseSuppression: true,
             autoGainControl: true,
             channelCount: 1,
           },
+        });
+      const mic = await getMic(opts.deviceId)
+        .catch((e: unknown) => {
+          // The saved mic is gone (e.g. unplugged headset): fall back to the default one.
+          const gone = e instanceof DOMException && (e.name === "OverconstrainedError" || e.name === "NotFoundError");
+          if (!opts.deviceId || !gone) throw e;
+          opts.onDeviceFallback?.();
+          return getMic();
         })
         .catch((e) => {
           throw describe(e, "mic");

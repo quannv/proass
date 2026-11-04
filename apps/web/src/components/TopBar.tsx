@@ -36,9 +36,11 @@ export default function TopBar({ onOpenSettings }: { onOpenSettings: () => void 
         {hasTranscript && view === "meeting" && status !== "stopping" && (
           <button
             onClick={() => void endMeeting()}
-            className="hidden items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-sm font-medium hover:bg-zinc-100 sm:inline-flex dark:border-zinc-700 dark:hover:bg-zinc-800"
+            aria-label="End & summarize"
+            title="End & summarize"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-2.5 py-2 text-sm font-medium hover:bg-zinc-100 sm:px-3 dark:border-zinc-700 dark:hover:bg-zinc-800"
           >
-            <FileText className="h-4 w-4" /> End &amp; summarize
+            <FileText className="h-4 w-4" /> <span className="hidden sm:inline">End &amp; summarize</span>
           </button>
         )}
         <button

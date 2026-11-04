@@ -1,6 +1,7 @@
 "use client";
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { persist } from "zustand/middleware";
+import type { PersistStorage, StorageValue } from "zustand/middleware";
 import { DEFAULT_SESSION_SETTINGS } from "@proass/shared";
 import type { MeetingSummary, ProviderInfo, SessionSettings, Suggestion, TranscriptSegment } from "@proass/shared";
 import type { AudioSource } from "@/audio/capture";
@@ -81,6 +82,49 @@ const emptyMeeting = {
 
 let localSeq = 0;
 
+/**
+ * localStorage, but writes are batched: the store changes many times a second while recording
+ * (level meter, partials), and serializing the whole transcript on each change makes long meetings janky.
+ * The latest state is written at most once a second, and immediately when the page is hidden or closed.
+ */
+function throttledLocalStorage<S>(delayMs = 1000): PersistStorage<S> {
+  let pending: { name: string; value: StorageValue<S> } | null = null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const flush = () => {
+    clearTimeout(timer);
+    timer = undefined;
+    if (!pending) return;
+    try {
+      localStorage.setItem(pending.name, JSON.stringify(pending.value));
+    } catch {
+      // Quota exceeded or storage blocked: the meeting still works, it just won't survive a reload.
+    }
+    pending = null;
+  };
+  if (typeof window !== "undefined") {
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", () => document.visibilityState === "hidden" && flush());
+  }
+  return {
+    getItem: (name) => {
+      try {
+        const raw = localStorage.getItem(name);
+        return raw ? (JSON.parse(raw) as StorageValue<S>) : null;
+      } catch {
+        return null;
+      }
+    },
+    setItem: (name, value) => {
+      pending = { name, value };
+      timer ??= setTimeout(flush, delayMs);
+    },
+    removeItem: (name) => {
+      pending = null;
+      localStorage.removeItem(name);
+    },
+  };
+}
+
 export const useMeeting = create<MeetingState>()(
   persist(
     (set, get) => ({
@@ -124,7 +168,7 @@ export const useMeeting = create<MeetingState>()(
     {
       name: "proass-meeting",
       version: 1,
-      storage: createJSONStorage(() => localStorage),
+      storage: throttledLocalStorage(),
       // Kept only in this browser so a reload never loses the transcript. Nothing is stored server-side.
       partialize: (s) => ({
         settings: s.settings,
